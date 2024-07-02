@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Copy this file into `.git/hooks/` to enable its use:
+#  `$> cp etc/hooks/* .git/hooks`
+
+# We want to run the formatter and linter for Swanky before every commit
+./swanky lint # Note that `./swanky link` runs `./swanky fmt --check`
+
+# It is preferable to fix all Clippy errors prior to a commit
+# If you'd like to enable this check, uncomment the next line
+# cargo clippy -- -Dwarnings # Warnings are considered errors

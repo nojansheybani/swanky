@@ -120,7 +120,11 @@ class _CrossCompile:
         return f"{self.target_arch}-unknown-linux-musl"
 
     def update_env(
-        self, ctx: click.Context, env: dict[str, str], cargo_args: list[str]
+        self,
+        ctx: click.Context,
+        env: dict[str, str],
+        cargo_args: list[str],
+        rustc_flags: list[str],
     ) -> None:
         """
         Update environment variables and cargo arguments for cross compilation.
@@ -194,6 +198,7 @@ class _CrossCompile:
                 f"-Clink-arg=--target={self.target}",
                 f"-Clink-arg=-fuse-ld={_linker(self.target)}",
             ]
+            + rustc_flags
         )
         # Check that the expected vectoreyes backend matches what's actualy in use
         vectoreyes_backend = (
@@ -256,6 +261,7 @@ def test_rust(
     cache_test_output: bool,
     cargo_nextest: bool = True,
     cross_compile: _CrossCompile | None = None,
+    code_coverage: Path | None = None,
 ) -> None:
     """
     Test rust code
@@ -265,6 +271,8 @@ def test_rust(
     cache_test_output: if True, then try to re-use the output of previous unit-tests
     cargo_nextest: if True, then run tests using cargo-nextest instead of the native runner
     cross_compile: if set, cross-compile and run on the specified target. Otherwise target the host
+    code_coverage: if set, write LLVM code coverage data to this folder. This is incompatible with
+                   test caching.
     """
     rich.get_console().rule("Test Rust")
     rich.pretty.pprint(
@@ -275,6 +283,10 @@ def test_rust(
             "cross_compile": cross_compile,
         }
     )
+    # Test caching assumes that running a test is side-effect-free. But writing coverage data to
+    # disk is a side-effect.
+    assert not (code_coverage and cache_test_output)
+
     env = dict(os.environ)
 
     # First, set up the environment for cross-compilation and test caching.
@@ -286,9 +298,12 @@ def test_rust(
         }
     else:
         cargo_runner_env = {}
+    instrument_coverage_flags = ["-Cinstrument-coverage"] if code_coverage else []
     if cross_compile:
         cargo_args = list(cargo_args)
-        cross_compile.update_env(ctx, env, cargo_args)
+        cross_compile.update_env(
+            ctx, env, cargo_args, rustc_flags=instrument_coverage_flags
+        )
         if cache_test_output:
             cargo_runner_env["SWANKY_CACHING_TEST_RUNNER_QEMU"] = str(
                 cross_compile.user_mode_emulator(ctx)
@@ -310,8 +325,20 @@ def test_rust(
                     "-Clinker=clang",
                     f"-Clink-arg=-fuse-ld={_linker(_host_triple())}",
                 ]
+                + instrument_coverage_flags
             )
         ]
+    if code_coverage:
+        code_coverage.mkdir(parents=True, exist_ok=True)
+        cargo_runner_env["SWANKY_CODECOV_DST"] = str(code_coverage.resolve())
+        runner_var = _cargo_target_runner_env_var(
+            cross_compile.target if cross_compile else _host_triple()
+        )
+        if runner_var in cargo_runner_env:
+            cargo_runner_env["SWANKY_CODECOV_NEXT_RUNNER"] = cargo_runner_env[
+                runner_var
+            ]
+        cargo_runner_env[runner_var] = str(ROOT / "etc/ci/wrappers/codecov_wrapper.py")
 
     # Then, let's run some tests!
     def run(cmd: list[str], extra_env: dict[str, str] = dict()) -> None:

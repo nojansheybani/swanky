@@ -433,6 +433,80 @@ def nightly(ctx: click.Context) -> None:
         cache_test_output=False,
         code_coverage=code_coverage,
     )
+    # Post-process code coverage data.
+    # What's the path to rust's llvm-tools?
+    llvm_bin = (
+        Path(
+            subprocess.check_output(["rustc", "--print", "sysroot"])
+            .decode("utf-8")
+            .strip()
+        )
+        / "lib/rustlib"
+        / _host_triple()
+        / "bin"
+    )
+    coverage_out = ROOT / "coverage"
+    coverage_out.mkdir()
+    lcov_data = coverage_out / "lcov"
+    lcov_data.mkdir()
+    # Merge the profile data for each executable into a single lcov file.
+    for cov_for_exe in code_coverage.iterdir():
+        exe = (cov_for_exe / "exe").resolve()
+        merged = cov_for_exe / "merged.profraw"
+        input_file = cov_for_exe / "inputs.txt"
+        input_file.write_text("\n".join(map(str, cov_for_exe.glob("*.profraw"))))
+        # First we merge the raw profile data.
+        subprocess.check_call(
+            [
+                llvm_bin / "llvm-profdata",
+                "merge",
+                "--sparse",
+                f"--input-files={input_file}",
+                f"--output={merged}",
+            ]
+        )
+        # Then we export the merged data as lcov.
+        # grcov requires that we use the .info extension for lcov files.
+        with (lcov_data / f"{cov_for_exe.name}.info").open("wb") as lcov_dst:
+            subprocess.check_call(
+                [
+                    llvm_bin / "llvm-cov",
+                    "export",
+                    str(exe),
+                    "--instr-profile",
+                    str(merged),
+                    "--format=lcov",
+                ],
+                stdout=lcov_dst,
+            )
+    # Process the code coverage data with grcov to generate reports.
+    subprocess.check_call(
+        [
+            _nix_build(
+                ctx,
+                "grcov",
+                [
+                    str(ROOT / "etc/nix/pkgs.nix"),
+                    "-A",
+                    "grcov",
+                ],
+            )
+            / "bin"
+            / "grcov",
+            lcov_data,
+            "--llvm-path",
+            str(llvm_bin),
+            "-s",
+            ".",
+            "-o",
+            coverage_out,
+            "--ignore",
+            Path.home() / ".cargo/**",
+            "--output-types",
+            "html,cobertura,covdir",
+        ],
+        cwd=ROOT,
+    )
 
 
 @ci.command()

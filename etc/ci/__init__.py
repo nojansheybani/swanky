@@ -379,19 +379,24 @@ def ci() -> None:
 def nightly(ctx: click.Context) -> None:
     """Run the nightly CI tests"""
     non_rust_tests(ctx)
-    for cross_compile in [_NEON, None]:
-        test_rust(
-            ctx,
-            cargo_args=["--features=serde"],
-            cache_test_output=False,
-            cross_compile=cross_compile,
-        )
-        test_rust(
-            ctx,
-            cargo_args=[],
-            cache_test_output=False,
-            cross_compile=cross_compile,
-        )
+    test_rust(
+        ctx,
+        cargo_args=["-p", "vectoreyes"],
+        cache_test_output=False,
+        cross_compile=_NEON,
+        # These tests are fast enough, that the overhead of cargo-nextest isn't a win.
+        cargo_nextest=False,
+    )
+    test_rust(
+        ctx,
+        cargo_args=["--features=serde"],
+        cache_test_output=False,
+    )
+    test_rust(
+        ctx,
+        cargo_args=[],
+        cache_test_output=False,
+    )
 
 
 @ci.command()

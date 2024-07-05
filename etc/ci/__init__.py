@@ -18,6 +18,7 @@ import rich.pretty
 import rich.syntax
 
 from etc import NIX_CACHE_KEY, ROOT
+from etc.ci.split_cobertura import split_cobertura
 from etc.ci.target_dir_cache import pack_target_dir, unpack_target_dir
 from etc.lint.cmd import lint
 
@@ -507,6 +508,7 @@ def nightly(ctx: click.Context) -> None:
         ],
         cwd=ROOT,
     )
+    split_cobertura(coverage_out / "cobertura.xml", coverage_out / "coverage-split")
 
 
 @ci.command()

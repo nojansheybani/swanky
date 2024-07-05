@@ -1,3 +1,4 @@
+import functools
 import itertools
 import json
 import os
@@ -239,6 +240,16 @@ def _cargo_target_runner_env_var(target: str) -> str:
     return "CARGO_TARGET_" + target.upper().replace("-", "_") + "_RUNNER"
 
 
+@functools.cache
+def _host_triple() -> str:
+    return (
+        subprocess.check_output(["rustc", "-Vv"])
+        .decode("utf-8")
+        .split("host:")[1]
+        .split()[0]
+    )
+
+
 def test_rust(
     ctx: click.Context,
     cargo_args: list[str],
@@ -265,18 +276,12 @@ def test_rust(
         }
     )
     env = dict(os.environ)
-    host_triple = (
-        subprocess.check_output(["rustc", "-Vv"])
-        .decode("utf-8")
-        .split("host:")[1]
-        .split()[0]
-    )
 
     # First, set up the environment for cross-compilation and test caching.
     if cache_test_output:
         cargo_runner_env = {
             _cargo_target_runner_env_var(
-                cross_compile.target if cross_compile else host_triple
+                cross_compile.target if cross_compile else _host_triple()
             ): str(ROOT / "etc/ci/wrappers/caching_test_runner.py"),
         }
     else:
@@ -303,7 +308,7 @@ def test_rust(
                 [
                     "-Clinker-flavor=gcc",
                     "-Clinker=clang",
-                    f"-Clink-arg=-fuse-ld={_linker(host_triple)}",
+                    f"-Clink-arg=-fuse-ld={_linker(_host_triple())}",
                 ]
             )
         ]

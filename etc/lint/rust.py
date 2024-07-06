@@ -195,7 +195,6 @@ def cargo_deny(ctx: click.Context) -> LintResult:
 # As of this writing, these libraries don't require documentation.
 LIBS_NOT_YET_DOCUMENTED = {
     "bristol-fashion/src/lib.rs",
-    "crates/field-ff-primes/src/lib.rs",
     "crates/field-fft/src/lib.rs",
     "crates/field-test/src/lib.rs",
     "diet-mac-and-cheese/web-mac-and-cheese/wasm/src/lib.rs",

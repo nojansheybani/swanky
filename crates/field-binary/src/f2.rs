@@ -188,6 +188,9 @@ impl PrimeFiniteField for F2 {
     }
 }
 
+/// A [`SequenceSerializer`] which will serialize a sequence of F2 values as bits.
+///
+/// This is more efficient than encoding each [`F2`] as a full byte.
 pub struct F2BitSerializer {
     current_word: u64,
     num_bits: usize,
@@ -229,6 +232,9 @@ impl std::ops::Drop for F2BitSerializer {
     }
 }
 
+/// A [`SequenceDeserializer`] which will deserialize a sequence of F2 values as bits.
+///
+/// This is more efficient than encoding each [`F2`] as a full byte.
 pub struct F2BitDeserializer {
     current_word: u64,
     num_bits: usize,

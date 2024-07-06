@@ -181,7 +181,7 @@ impl PrimeFiniteField for F61p {
         Uint::from_u64(MODULUS)
     }
 
-    fn into_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
+    fn as_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
         assert!(LIMBS >= Self::MIN_LIMBS_NEEDED);
 
         Uint::from_u64(self.0)

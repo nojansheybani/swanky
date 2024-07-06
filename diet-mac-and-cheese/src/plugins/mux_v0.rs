@@ -471,7 +471,7 @@ mod tests {
                 vec![(13, 13)],
                 vec![(1, 1), (4, 4), (8, 8)],
             ))),
-            GateM::AddConstant(FF0, 14, 13, Box::from((-F2::ONE).into_int())),
+            GateM::AddConstant(FF0, 14, 13, Box::from((-F2::ONE).as_int())),
             GateM::AssertZero(FF0, 14),
         ];
 

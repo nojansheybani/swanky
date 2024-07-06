@@ -166,7 +166,7 @@ pub trait PrimeFiniteField:
     /// # Panics
     ///
     /// This method should panic if `LIMBS` < `MIN_LIMBS_NEEDED`.
-    fn into_int<const LIMBS: usize>(&self) -> Uint<LIMBS>;
+    fn as_int<const LIMBS: usize>(&self) -> Uint<LIMBS>;
 
     /// Try to convert a `Uint` into a `PrimeFiniteField` value, returning
     /// a [`CtOption`].

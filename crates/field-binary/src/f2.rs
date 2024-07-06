@@ -171,7 +171,7 @@ impl PrimeFiniteField for F2 {
         Uint::<LIMBS>::from_word(MODULUS.into())
     }
 
-    fn into_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
+    fn as_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
         assert!(LIMBS >= Self::MIN_LIMBS_NEEDED);
 
         Uint::<LIMBS>::from_u8(self.0)

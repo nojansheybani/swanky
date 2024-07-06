@@ -1,4 +1,3 @@
-#![allow(clippy::all)]
 //! This crate contains [`F61p`], an implementation of $`\mathbb{F}_{2^{61}-1}`$
 
 #![deny(missing_docs)]
@@ -156,7 +155,7 @@ impl std::iter::Sum for F61p {
         for e in iter {
             out += u128::from(e.0);
         }
-        return F61p(reduce(out));
+        F61p(reduce(out))
     }
 }
 
@@ -224,6 +223,6 @@ mod tests {
     fn test_sum_overflow() {
         let neg1 = F61p::ZERO - F61p::ONE;
         let x = [neg1; 2];
-        assert_eq!(x.iter().map(|x| *x).sum::<F61p>(), neg1 + neg1);
+        assert_eq!(x.iter().copied().sum::<F61p>(), neg1 + neg1);
     }
 }

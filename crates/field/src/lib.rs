@@ -1,4 +1,3 @@
-#![allow(clippy::all)]
 //! This crate contains base types and traits for our finite field types.
 //!
 //! See [`FiniteField`] and [`FiniteRing`] to get started.

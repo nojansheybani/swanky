@@ -197,6 +197,8 @@ macro_rules! field_ops {
         $crate::ring_ops!(@assign_op DivAssign, div_assign, $f);
 
         impl<'a> std::ops::DivAssign<&'a $f> for $f {
+            // It's okay for us to implement division via multiplication.
+            #[allow(clippy::suspicious_op_assign_impl)]
             fn div_assign(&mut self, rhs: &Self) {
                 *self *= rhs.inverse();
             }

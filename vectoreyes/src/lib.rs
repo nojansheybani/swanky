@@ -54,6 +54,20 @@ pub enum VectorBackend {
 /// The vector backend that this process is using.
 pub const VECTOR_BACKEND: VectorBackend = current_vector_backend();
 
+/// Panic if the current binary uses features unsupported by the current CPU.
+///
+/// Vectoreyes uses compile-time flags to select which backend to use and which CPU features to
+/// require. If this backend is used on an unsupported CPU, it will result in an "Illegal
+/// instruction" error (technically, _all_ Rust code--not even just vectoreyes code--may result in
+/// undefined behavior if run on a CPU that doesn't support the compile-time selected feature
+/// flags).
+///
+/// It would be advisable to call this in the `main()` function of executables to try to catch
+/// these errors early.
+pub fn assert_cpu_features() {
+    vector_backend_check_cpu()
+}
+
 /// A scalar that can live in the lane of a vector.
 pub trait Scalar:
     'static

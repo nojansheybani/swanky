@@ -41,6 +41,10 @@ pub trait VectorBackend {
     /// Which `vectoreyes::VectorBackend` enum variant does this backend map to?
     fn vector_backend_variant(&self) -> &str;
 
+    /// Emit code for a runtime check to panic if the current CPU doesn't have the features we
+    /// assumed at compile-time.
+    fn check_cpu(&self) -> TokenStream;
+
     /// What's the internal type/representation for vector `ty`?
     fn vector_contents(&self, ty: VectorType) -> TokenStream {
         ty.array()
@@ -99,5 +103,8 @@ impl VectorBackend for Scalar {
     }
     fn vector_backend_variant(&self) -> &str {
         "Scalar"
+    }
+    fn check_cpu(&self) -> TokenStream {
+        quote! {}
     }
 }

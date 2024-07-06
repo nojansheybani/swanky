@@ -23,11 +23,13 @@ impl ConditionallySelectable for F8b {
     }
 }
 impl<'a> AddAssign<&'a F8b> for F8b {
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn add_assign(&mut self, rhs: &'a F8b) {
         self.0 ^= rhs.0;
     }
 }
 impl<'a> SubAssign<&'a F8b> for F8b {
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn sub_assign(&mut self, rhs: &'a F8b) {
         *self += *rhs;
     }
@@ -43,7 +45,7 @@ impl<'a> MulAssign<&'a F8b> for F8b {
 
         // Reduce! This reduction code was generated using SageMath as a function of the
         // polynomial modulus selected for the field.
-        let reduced_product = (wide_product >> 0) & 0b0000000011111111
+        let reduced_product = wide_product & 0b0000000011111111
             ^ (wide_product >> 4) & 0b000011110000
             ^ (wide_product >> 5) & 0b00011111000
             ^ (wide_product >> 7) & 0b011111110
@@ -90,6 +92,7 @@ impl FiniteRing for F8b {
 }
 impl FiniteField for F8b {
     type PrimeField = F2;
+    #[allow(clippy::eq_op)]
     fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
         let mut coefficients = vec![F2::ZERO; 8];
         coefficients[8 - 1] = F2::ONE;
@@ -123,7 +126,7 @@ swanky_field::field_ops!(F8b);
 
 impl From<F2> for F8b {
     fn from(value: F2) -> Self {
-        Self(value.0.into())
+        Self(value.0)
     }
 }
 // Prime subfield
@@ -133,7 +136,7 @@ impl Mul<F8b> for F2 {
     fn mul(self, x: F8b) -> Self::Output {
         // Equivalent to:
         // Self::conditional_select(&Self::ZERO, &self, pf.ct_eq(&F2::ONE))
-        let new = (!((self.0 as u8).wrapping_sub(1))) & x.0;
+        let new = (!(self.0.wrapping_sub(1))) & x.0;
         debug_assert!(new == 0 || new == x.0);
         F8b(new)
     }
@@ -184,7 +187,7 @@ impl IsSubFieldOf<F128b> for F8b {
             .into_iter()
             // This is a dot product!
             .map(|row| (row & fe.0).count_ones() % 2 == 1)
-            .map(|bit| F2::from(bit))
+            .map(F2::from)
             .collect::<GenericArray<_, U128>>();
 
         // Un-flatten the result
@@ -213,12 +216,15 @@ impl IsSubFieldOf<F128b> for F8b {
             .into_iter()
             // This is a dot product over bits!
             .map(|row| (row & input_bits).count_ones() % 2 == 1)
-            .map(|bit| F2::from(bit))
+            .map(F2::from)
             .collect();
 
         F2::form_superfield(&converted_input)
     }
 }
+
+mod conversion_matrices;
+use conversion_matrices::*;
 
 #[cfg(test)]
 mod tests {
@@ -251,7 +257,7 @@ mod tests {
 
         let components = a
             .into_iter()
-            .map(|ai| u8_to_f8b(ai))
+            .map(u8_to_f8b)
             .collect::<GenericArray<F8b, U16>>();
         let actual: F128b = F8b::form_superfield(&components);
 
@@ -336,7 +342,7 @@ mod tests {
         ];
         let a = [0u8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
             .into_iter()
-            .map(|n| u8_to_f8b(n))
+            .map(u8_to_f8b)
             .collect::<GenericArray<F8b, U16>>();
 
         let a_squared = multiply_f8b_16_elements(a, a);

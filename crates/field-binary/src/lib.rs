@@ -1,4 +1,3 @@
-#![allow(clippy::all)]
 //! This crate contains implementations of $`\mathbb{F}_2`$ as well as binary extension fields.
 
 #![deny(missing_docs)]

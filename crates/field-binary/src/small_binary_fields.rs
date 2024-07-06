@@ -77,12 +77,14 @@ macro_rules! small_binary_field {
 
         impl<'a> AddAssign<&'a $name> for $name {
             #[inline]
+            #[allow(clippy::suspicious_op_assign_impl)]
             fn add_assign(&mut self, rhs: &'a $name) {
                 self.0 ^= rhs.0;
             }
         }
         impl<'a> SubAssign<&'a $name> for $name {
             #[inline]
+            #[allow(clippy::suspicious_op_assign_impl)]
             fn sub_assign(&mut self, rhs: &'a $name) {
                 // The additive inverse of GF(2^128) is the identity
                 *self += rhs;
@@ -303,6 +305,7 @@ where
     )
 }
 
+#[allow(clippy::eq_op)]
 fn polynomial_modulus_f63b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 63];
     coefficients[63 - 1] = F2::ONE;
@@ -327,7 +330,7 @@ small_binary_field!(
 fn reduce_f56b(product: U64x2) -> F56b {
     // TODO: implement this more efficiently
     let x: u128 = bytemuck::cast(product);
-    let reduced = ((x >> 0) & 0b0000000011111111111111111111111111111111111111111111111111111111
+    let reduced = (x & 0b0000000011111111111111111111111111111111111111111111111111111111
         ^ (x >> 48) & 0b0000000011111111111111111111111111111111111111111111111100000000
         ^ (x >> 53) & 0b0000011111111111111111111111111111111111111111111111111111000
         ^ (x >> 54) & 0b000011111111111111111111111111111111111111111111111111111100
@@ -346,6 +349,7 @@ fn reduce_f56b(product: U64x2) -> F56b {
     F56b(reduced)
 }
 
+#[allow(clippy::eq_op)]
 fn polynomial_modulus_f56b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 56];
     coefficients[56 - 1] = F2::ONE;
@@ -376,10 +380,11 @@ fn reduce_f40b(product: U64x2) -> F40b {
 
     let t = ((the_upper & upper_mask) << 24) | (r_lower >> 40);
     let r_upper = t ^ (t >> 35) ^ (t >> 36) ^ (t >> 37);
-    let r_lower = r_lower ^ (r_upper << 5) ^ (r_upper << 4) ^ (r_upper << 3) ^ (r_upper << 0);
+    let r_lower = r_lower ^ (r_upper << 5) ^ (r_upper << 4) ^ (r_upper << 3) ^ r_upper;
     F40b(lower_mask & r_lower)
 }
 
+#[allow(clippy::eq_op)]
 fn polynomial_modulus_f40b() -> Polynomial<F2> {
     // x^40 + x^5 + x^4 + x^3 + 1
     let mut coefficients = vec![F2::ZERO; 40];
@@ -406,7 +411,7 @@ small_binary_field!(
 fn reduce_f45b(wide_product: U64x2) -> F45b {
     let wide_product: u128 = bytemuck::cast(wide_product);
     F45b(
-        ((wide_product >> 0) & 0b0000000000000000000111111111111111111111111111111111111111111111
+        (wide_product & 0b0000000000000000000111111111111111111111111111111111111111111111
             ^ (wide_product >> 17)
                 & 0b0000000000000000000111111111111111110000000000000000000000000000
             ^ (wide_product >> 28)
@@ -422,6 +427,7 @@ fn reduce_f45b(wide_product: U64x2) -> F45b {
     )
 }
 
+#[allow(clippy::eq_op)]
 fn polynomial_modulus_f45b() -> Polynomial<F2> {
     //X2^45 + X2^28 + X2^17 + X2^11 + 1
     let mut coefficients = vec![F2::ZERO; 128];

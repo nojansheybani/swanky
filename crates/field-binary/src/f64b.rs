@@ -17,8 +17,7 @@ impl F64b {
     fn reduce(product: U64x2) -> Self {
         // TODO: This can almost certainly be optimized.
         let product: u128 = bytemuck::cast(product);
-        let result = ((product >> 0)
-            & 0b1111111111111111111111111111111111111111111111111111111111111111)
+        let result = (product & 0b1111111111111111111111111111111111111111111111111111111111111111)
             ^ ((product >> 45)
                 & 0b1111111111111111111111111111111111111111111110000000000000000000)
             ^ ((product >> 48)
@@ -65,12 +64,14 @@ impl ConditionallySelectable for F64b {
 
 impl<'a> AddAssign<&'a F64b> for F64b {
     #[inline]
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn add_assign(&mut self, rhs: &'a Self) {
         self.0 ^= rhs.0;
     }
 }
 impl<'a> SubAssign<&'a F64b> for F64b {
     #[inline]
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn sub_assign(&mut self, rhs: &'a Self) {
         // The additive inverse of GF(2^64) is the identity
         *self += rhs;
@@ -119,6 +120,7 @@ impl FiniteRing for F64b {
 impl FiniteField for F64b {
     type PrimeField = F2;
 
+    #[allow(clippy::eq_op)]
     fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
         let mut coefficients = vec![F2::ZERO; 64];
         coefficients[64 - 1] = F2::ONE;

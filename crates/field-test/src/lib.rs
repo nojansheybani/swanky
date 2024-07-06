@@ -1,4 +1,3 @@
-#![allow(clippy::all)]
 //! Utilities which can be used for testing finite field and finite ring implementations.
 //!
 //! The `test_field!` macro is the main macro of this crate.

@@ -1,4 +1,9 @@
 #![allow(clippy::all)]
+//! Utilities which can be used for testing finite field and finite ring implementations.
+//!
+//! The `test_field!` macro is the main macro of this crate.
+
+#![deny(missing_docs)]
 /// Dependent crates might not neccessarily depend on `proptest`, for example, themsevles.
 /// Nonetheless, macros written in _this_ crate need to be able to access `proptest`, even when
 /// those macros are invoked from other crates. To solve this problem, we re-export the crates that

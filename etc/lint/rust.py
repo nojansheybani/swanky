@@ -196,7 +196,6 @@ def cargo_deny(ctx: click.Context) -> LintResult:
 LIBS_NOT_YET_DOCUMENTED = {
     "bristol-fashion/src/lib.rs",
     "crates/field-fft/src/lib.rs",
-    "crates/field-test/src/lib.rs",
     "diet-mac-and-cheese/web-mac-and-cheese/wasm/src/lib.rs",
     "diet-mac-and-cheese/web-mac-and-cheese/websocket/src/lib.rs",
     "fancy-garbling/base_conversion/src/lib.rs",

@@ -1,4 +1,7 @@
 #![allow(clippy::all)]
+//! This crate contains [`F61p`], an implementation of $`\mathbb{F}_{2^{61}-1}`$
+
+#![deny(missing_docs)]
 use crypto_bigint::Uint;
 use generic_array::GenericArray;
 use rand::Rng;

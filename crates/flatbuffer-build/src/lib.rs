@@ -1,4 +1,3 @@
-#![allow(clippy::all)]
 #![deny(missing_docs)]
 //! Utilities to build flatbuffers code.
 //!

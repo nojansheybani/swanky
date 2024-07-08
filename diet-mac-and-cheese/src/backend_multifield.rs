@@ -2565,38 +2565,38 @@ pub(crate) mod tests {
     const FF3: u8 = 3;
 
     pub(crate) fn zero<FE: PrimeFiniteField>() -> Number {
-        FE::ZERO.into_int()
+        FE::ZERO.as_int()
     }
     pub(crate) fn one<FE: PrimeFiniteField>() -> Number {
-        FE::ONE.into_int()
+        FE::ONE.as_int()
     }
     pub(crate) fn two<FE: PrimeFiniteField>() -> Number {
-        (FE::ONE + FE::ONE).into_int()
+        (FE::ONE + FE::ONE).as_int()
     }
     pub(crate) fn minus_one<FE: PrimeFiniteField>() -> Number {
-        (-FE::ONE).into_int()
+        (-FE::ONE).as_int()
     }
     pub(crate) fn minus_two<FE: PrimeFiniteField>() -> Number {
-        (-(FE::ONE + FE::ONE)).into_int()
+        (-(FE::ONE + FE::ONE)).as_int()
     }
     pub(crate) fn three<FE: PrimeFiniteField>() -> Number {
-        (FE::ONE + FE::ONE + FE::ONE).into_int()
+        (FE::ONE + FE::ONE + FE::ONE).as_int()
     }
     pub(crate) fn minus_three<FE: PrimeFiniteField>() -> Number {
-        (-(FE::ONE + FE::ONE + FE::ONE)).into_int()
+        (-(FE::ONE + FE::ONE + FE::ONE)).as_int()
     }
     pub(crate) fn four<FE: PrimeFiniteField>() -> Number {
-        (FE::ONE + FE::ONE + FE::ONE + FE::ONE).into_int()
+        (FE::ONE + FE::ONE + FE::ONE + FE::ONE).as_int()
     }
     pub(crate) fn minus_four<FE: PrimeFiniteField>() -> Number {
-        (-(FE::ONE + FE::ONE + FE::ONE + FE::ONE)).into_int()
+        (-(FE::ONE + FE::ONE + FE::ONE + FE::ONE)).as_int()
     }
     pub(crate) fn minus_five<FE: PrimeFiniteField>() -> Number {
-        (-(FE::ONE + FE::ONE + FE::ONE + FE::ONE + FE::ONE)).into_int()
+        (-(FE::ONE + FE::ONE + FE::ONE + FE::ONE + FE::ONE)).as_int()
     }
     pub(crate) fn minus_nine<FE: PrimeFiniteField>() -> Number {
         (-(FE::ONE + FE::ONE + FE::ONE + FE::ONE + FE::ONE + FE::ONE + FE::ONE + FE::ONE + FE::ONE))
-            .into_int()
+            .as_int()
     }
 
     fn wr(w: WireId) -> WireRange {
@@ -2881,10 +2881,10 @@ pub(crate) mod tests {
         let instances = vec![
             vec![],
             vec![
-                F2::ZERO.into_int(),
-                F2::ONE.into_int(),
-                F2::ZERO.into_int(),
-                F2::ONE.into_int(),
+                F2::ZERO.as_int(),
+                F2::ONE.as_int(),
+                F2::ZERO.as_int(),
+                F2::ONE.as_int(),
             ],
         ];
         let witnesses = vec![vec![], vec![]];
@@ -2983,8 +2983,8 @@ pub(crate) mod tests {
         let instances = vec![vec![], vec![], vec![], vec![]];
         let witnesses = vec![
             vec![],
-            vec![F384p::ZERO.into_int()],
-            vec![F384q::ONE.into_int()],
+            vec![F384p::ZERO.as_int()],
+            vec![F384q::ONE.as_int()],
             vec![],
         ];
 
@@ -3035,8 +3035,8 @@ pub(crate) mod tests {
 
         let instances = vec![vec![], vec![]];
         let witnesses = vec![
-            vec![Secp256k1::ZERO.into_int()],
-            vec![Secp256k1order::ONE.into_int()],
+            vec![Secp256k1::ZERO.as_int()],
+            vec![Secp256k1order::ONE.as_int()],
             vec![],
         ];
 
@@ -3075,7 +3075,7 @@ pub(crate) mod tests {
                 FF0,
                 7,
                 6,
-                Box::from((-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).into_int()),
+                Box::from((-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).as_int()),
             ),
             GateM::AssertZero(FF0, 7),
         ];
@@ -3119,7 +3119,7 @@ pub(crate) mod tests {
                 FF0,
                 7,
                 6,
-                Box::from((-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).into_int()),
+                Box::from((-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).as_int()),
             ),
             GateM::AssertZero(FF0, 7),
         ];
@@ -3163,7 +3163,7 @@ pub(crate) mod tests {
                 FF0,
                 7,
                 6,
-                Box::from((-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).into_int()),
+                Box::from((-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).as_int()),
             ),
             GateM::AssertZero(FF0, 7),
         ];
@@ -3197,8 +3197,8 @@ pub(crate) mod tests {
         func.compiled_info.body_max = None;
         let fun_id = func_store.insert("myfun".into(), func).unwrap();
 
-        let two = (F61p::ONE + F61p::ONE).into_int();
-        let minus_four = (-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).into_int();
+        let two = (F61p::ONE + F61p::ONE).as_int();
+        let minus_four = (-(F61p::ONE + F61p::ONE + F61p::ONE + F61p::ONE)).as_int();
         let gates = vec![
             // New(0,2)
             // New(3,3)

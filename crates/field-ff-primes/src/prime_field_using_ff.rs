@@ -239,7 +239,7 @@ macro_rules! prime_field_using_ff {
                     Uint::from_words(limbs)
                 }
 
-                fn into_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
+                fn as_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
                     assert!(LIMBS >= Self::MIN_LIMBS_NEEDED);
 
                     let mut limbs = [0; LIMBS];

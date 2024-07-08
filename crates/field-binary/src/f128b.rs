@@ -29,12 +29,14 @@ impl ConditionallySelectable for F128b {
 
 impl<'a> AddAssign<&'a F128b> for F128b {
     #[inline]
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn add_assign(&mut self, rhs: &'a F128b) {
         self.0 ^= rhs.0;
     }
 }
 impl<'a> SubAssign<&'a F128b> for F128b {
     #[inline]
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn sub_assign(&mut self, rhs: &'a F128b) {
         // The additive inverse of GF(2^128) is the identity
         *self += rhs;
@@ -107,7 +109,7 @@ mod multiply {
             let x = F128b(x).decompose();
             Polynomial {
                 constant: x[0],
-                coefficients: x[1..].iter().cloned().collect(),
+                coefficients: x[1..].to_vec(),
             }
         }
 
@@ -204,6 +206,7 @@ impl FiniteField for F128b {
 
     const GENERATOR: Self = F128b(2);
 
+    #[allow(clippy::eq_op)]
     fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
         let mut coefficients = vec![F2::ZERO; 128];
         coefficients[128 - 1] = F2::ONE;

@@ -107,6 +107,7 @@ impl FiniteField for F2 {
 
 impl AddAssign<&F2> for F2 {
     #[inline]
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn add_assign(&mut self, rhs: &F2) {
         self.0 ^= rhs.0;
     }
@@ -121,6 +122,7 @@ impl SubAssign<&F2> for F2 {
 
 impl MulAssign<&F2> for F2 {
     #[inline]
+    #[allow(clippy::suspicious_op_assign_impl)]
     fn mul_assign(&mut self, rhs: &F2) {
         self.0 &= rhs.0;
     }
@@ -171,7 +173,7 @@ impl PrimeFiniteField for F2 {
         Uint::<LIMBS>::from_word(MODULUS.into())
     }
 
-    fn into_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
+    fn as_int<const LIMBS: usize>(&self) -> Uint<LIMBS> {
         assert!(LIMBS >= Self::MIN_LIMBS_NEEDED);
 
         Uint::<LIMBS>::from_u8(self.0)
@@ -188,6 +190,9 @@ impl PrimeFiniteField for F2 {
     }
 }
 
+/// A [`SequenceSerializer`] which will serialize a sequence of F2 values as bits.
+///
+/// This is more efficient than encoding each [`F2`] as a full byte.
 pub struct F2BitSerializer {
     current_word: u64,
     num_bits: usize,
@@ -229,6 +234,9 @@ impl std::ops::Drop for F2BitSerializer {
     }
 }
 
+/// A [`SequenceDeserializer`] which will deserialize a sequence of F2 values as bits.
+///
+/// This is more efficient than decoding each [`F2`] as a full byte.
 pub struct F2BitDeserializer {
     current_word: u64,
     num_bits: usize,
@@ -286,7 +294,7 @@ mod tests {
                         x += MODULUS as u8;
                     }
                     x.$op(&y);
-                    x = x % MODULUS as u8;
+                    x %= MODULUS as u8;
                     assert_eq!(a.0, x);
                 }
             }

@@ -232,7 +232,7 @@ mod tests {
         let mut v: Vec<Vec<Number>> = (0..ntuples)
             .map(|_| {
                 (0..tuple_size)
-                    .map(|_| F::random(&mut rng).into_int())
+                    .map(|_| F::random(&mut rng).as_int())
                     .collect()
             })
             .collect();
@@ -241,7 +241,7 @@ mod tests {
         v.shuffle(&mut rng);
         let mut instances: Vec<Number> = v.into_iter().flatten().collect();
         if !is_good {
-            instances[0] = F::random(&mut rng).into_int();
+            instances[0] = F::random(&mut rng).as_int();
         }
 
         let result = test_circuit(fields, fun_store, gates, vec![instances], vec![witnesses]);
@@ -271,7 +271,7 @@ mod tests {
             .clone()
             .into_iter()
             .flatten()
-            .map(|x| x.into_int())
+            .map(|x| x.as_int())
             .collect();
         v.shuffle(&mut rng);
         let mut copy_v: Vec<F> = v.into_iter().flatten().collect();
@@ -279,7 +279,7 @@ mod tests {
             copy_v[0] = F::ONE - copy_v[0]; // take the negative value instead of random, so that it works for binary
         }
 
-        let instances: Vec<Number> = copy_v.into_iter().map(|x| x.into_int()).collect();
+        let instances: Vec<Number> = copy_v.into_iter().map(|x| x.as_int()).collect();
 
         let result =
             test_circuit_plaintext(fields, fun_store, gates, vec![instances], vec![witnesses]);

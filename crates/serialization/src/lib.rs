@@ -1,4 +1,4 @@
-#![allow(clippy::all)]
+#![deny(missing_docs)]
 //! Serialization types for algebraic structures.
 
 use generic_array::typenum::Unsigned;
@@ -102,8 +102,7 @@ impl<E: CanonicalSerialize> SequenceDeserializer<E> for ByteElementDeserializer<
     fn read<R: Read>(&mut self, src: &mut R) -> std::io::Result<E> {
         let mut buf: GenericArray<u8, E::ByteReprLen> = Default::default();
         src.read_exact(&mut buf)?;
-        Ok(E::from_bytes(&buf)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?)
+        E::from_bytes(&buf).map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
     }
 }
 
@@ -144,11 +143,11 @@ pub mod serde_vec {
         let nbytes = E::Serializer::serialized_size(vec.len());
         let mut bytes = Vec::with_capacity(nbytes);
         let mut cursor = std::io::Cursor::new(&mut bytes);
-        let mut ser = E::Serializer::new(&mut cursor).map_err(|e| Error::custom(e))?;
+        let mut ser = E::Serializer::new(&mut cursor).map_err(Error::custom)?;
         for f in vec.iter() {
-            ser.write(&mut cursor, *f).map_err(|e| Error::custom(e))?;
+            ser.write(&mut cursor, *f).map_err(Error::custom)?;
         }
-        ser.finish(&mut cursor).map_err(|e| Error::custom(e))?;
+        ser.finish(&mut cursor).map_err(Error::custom)?;
 
         let mut state = s.serialize_tuple_struct("Vec<F>", 2)?;
         state.serialize_field(&(vec.len() as u64))?;
@@ -185,14 +184,14 @@ pub mod serde_vec {
                     Some(n) => n,
                     None => return Err(A::Error::missing_field("number of elements")),
                 };
-                let nelements = usize::try_from(nelements).map_err(|e| Error::custom(e))?;
+                let nelements = usize::try_from(nelements).map_err(Error::custom)?;
                 let nbytes = F::Serializer::serialized_size(nelements);
 
                 let bytes = match seq.next_element::<Vec<u8>>()? {
                     Some(v) => v,
                     None => return Err(A::Error::missing_field("vector of bytes")),
                 };
-                if let Some(_) = seq.next_element::<u8>()? {
+                if seq.next_element::<u8>()?.is_some() {
                     return Err(A::Error::custom("extra element encountered"));
                 }
                 if bytes.len() != nbytes {
@@ -200,11 +199,11 @@ pub mod serde_vec {
                 }
 
                 let mut cursor = std::io::Cursor::new(&bytes);
-                let mut de = F::Deserializer::new(&mut cursor).map_err(|e| Error::custom(e))?;
+                let mut de = F::Deserializer::new(&mut cursor).map_err(Error::custom)?;
 
                 let mut vec: Vec<F> = Vec::with_capacity(nelements);
                 for _ in 0..nelements {
-                    let e = de.read(&mut cursor).map_err(|e| Error::custom(e))?;
+                    let e = de.read(&mut cursor).map_err(Error::custom)?;
                     vec.push(e);
                 }
                 Ok(vec)

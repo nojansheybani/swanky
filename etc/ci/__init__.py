@@ -1,3 +1,4 @@
+import functools
 import itertools
 import json
 import os
@@ -17,6 +18,7 @@ import rich.pretty
 import rich.syntax
 
 from etc import NIX_CACHE_KEY, ROOT
+from etc.ci.split_cobertura import split_cobertura
 from etc.ci.target_dir_cache import pack_target_dir, unpack_target_dir
 from etc.lint.cmd import lint
 
@@ -119,7 +121,11 @@ class _CrossCompile:
         return f"{self.target_arch}-unknown-linux-musl"
 
     def update_env(
-        self, ctx: click.Context, env: dict[str, str], cargo_args: list[str]
+        self,
+        ctx: click.Context,
+        env: dict[str, str],
+        cargo_args: list[str],
+        rustc_flags: list[str],
     ) -> None:
         """
         Update environment variables and cargo arguments for cross compilation.
@@ -193,6 +199,7 @@ class _CrossCompile:
                 f"-Clink-arg=--target={self.target}",
                 f"-Clink-arg=-fuse-ld={_linker(self.target)}",
             ]
+            + rustc_flags
         )
         # Check that the expected vectoreyes backend matches what's actualy in use
         vectoreyes_backend = (
@@ -239,12 +246,23 @@ def _cargo_target_runner_env_var(target: str) -> str:
     return "CARGO_TARGET_" + target.upper().replace("-", "_") + "_RUNNER"
 
 
+@functools.cache
+def _host_triple() -> str:
+    return (
+        subprocess.check_output(["rustc", "-Vv"])
+        .decode("utf-8")
+        .split("host:")[1]
+        .split()[0]
+    )
+
+
 def test_rust(
     ctx: click.Context,
     cargo_args: list[str],
     cache_test_output: bool,
     cargo_nextest: bool = True,
     cross_compile: _CrossCompile | None = None,
+    code_coverage: Path | None = None,
 ) -> None:
     """
     Test rust code
@@ -254,6 +272,8 @@ def test_rust(
     cache_test_output: if True, then try to re-use the output of previous unit-tests
     cargo_nextest: if True, then run tests using cargo-nextest instead of the native runner
     cross_compile: if set, cross-compile and run on the specified target. Otherwise target the host
+    code_coverage: if set, write LLVM code coverage data to this folder. This is incompatible with
+                   test caching.
     """
     rich.get_console().rule("Test Rust")
     rich.pretty.pprint(
@@ -264,26 +284,27 @@ def test_rust(
             "cross_compile": cross_compile,
         }
     )
+    # Test caching assumes that running a test is side-effect-free. But writing coverage data to
+    # disk is a side-effect.
+    assert not (code_coverage and cache_test_output)
+
     env = dict(os.environ)
-    host_triple = (
-        subprocess.check_output(["rustc", "-Vv"])
-        .decode("utf-8")
-        .split("host:")[1]
-        .split()[0]
-    )
 
     # First, set up the environment for cross-compilation and test caching.
     if cache_test_output:
         cargo_runner_env = {
             _cargo_target_runner_env_var(
-                cross_compile.target if cross_compile else host_triple
+                cross_compile.target if cross_compile else _host_triple()
             ): str(ROOT / "etc/ci/wrappers/caching_test_runner.py"),
         }
     else:
         cargo_runner_env = {}
+    instrument_coverage_flags = ["-Cinstrument-coverage"] if code_coverage else []
     if cross_compile:
         cargo_args = list(cargo_args)
-        cross_compile.update_env(ctx, env, cargo_args)
+        cross_compile.update_env(
+            ctx, env, cargo_args, rustc_flags=instrument_coverage_flags
+        )
         if cache_test_output:
             cargo_runner_env["SWANKY_CACHING_TEST_RUNNER_QEMU"] = str(
                 cross_compile.user_mode_emulator(ctx)
@@ -303,10 +324,22 @@ def test_rust(
                 [
                     "-Clinker-flavor=gcc",
                     "-Clinker=clang",
-                    f"-Clink-arg=-fuse-ld={_linker(host_triple)}",
+                    f"-Clink-arg=-fuse-ld={_linker(_host_triple())}",
                 ]
+                + instrument_coverage_flags
             )
         ]
+    if code_coverage:
+        code_coverage.mkdir(parents=True, exist_ok=True)
+        cargo_runner_env["SWANKY_CODECOV_DST"] = str(code_coverage.resolve())
+        runner_var = _cargo_target_runner_env_var(
+            cross_compile.target if cross_compile else _host_triple()
+        )
+        if runner_var in cargo_runner_env:
+            cargo_runner_env["SWANKY_CODECOV_NEXT_RUNNER"] = cargo_runner_env[
+                runner_var
+            ]
+        cargo_runner_env[runner_var] = str(ROOT / "etc/ci/wrappers/codecov_wrapper.py")
 
     # Then, let's run some tests!
     def run(cmd: list[str], extra_env: dict[str, str] = dict()) -> None:
@@ -379,6 +412,7 @@ def ci() -> None:
 def nightly(ctx: click.Context) -> None:
     """Run the nightly CI tests"""
     non_rust_tests(ctx)
+    code_coverage = ROOT / "target/code-coverage"
     test_rust(
         ctx,
         cargo_args=["-p", "vectoreyes"],
@@ -386,17 +420,95 @@ def nightly(ctx: click.Context) -> None:
         cross_compile=_NEON,
         # These tests are fast enough, that the overhead of cargo-nextest isn't a win.
         cargo_nextest=False,
+        code_coverage=code_coverage,
     )
     test_rust(
         ctx,
         cargo_args=["--features=serde"],
         cache_test_output=False,
+        code_coverage=code_coverage,
     )
     test_rust(
         ctx,
         cargo_args=[],
         cache_test_output=False,
+        code_coverage=code_coverage,
     )
+    # Post-process code coverage data.
+    # What's the path to rust's llvm-tools?
+    llvm_bin = (
+        Path(
+            subprocess.check_output(["rustc", "--print", "sysroot"])
+            .decode("utf-8")
+            .strip()
+        )
+        / "lib/rustlib"
+        / _host_triple()
+        / "bin"
+    )
+    coverage_out = ROOT / "coverage"
+    coverage_out.mkdir()
+    lcov_data = coverage_out / "lcov"
+    lcov_data.mkdir()
+    # Merge the profile data for each executable into a single lcov file.
+    for cov_for_exe in code_coverage.iterdir():
+        exe = (cov_for_exe / "exe").resolve()
+        merged = cov_for_exe / "merged.profraw"
+        input_file = cov_for_exe / "inputs.txt"
+        input_file.write_text("\n".join(map(str, cov_for_exe.glob("*.profraw"))))
+        # First we merge the raw profile data.
+        subprocess.check_call(
+            [
+                llvm_bin / "llvm-profdata",
+                "merge",
+                "--sparse",
+                f"--input-files={input_file}",
+                f"--output={merged}",
+            ]
+        )
+        # Then we export the merged data as lcov.
+        # grcov requires that we use the .info extension for lcov files.
+        with (lcov_data / f"{cov_for_exe.name}.info").open("wb") as lcov_dst:
+            subprocess.check_call(
+                [
+                    llvm_bin / "llvm-cov",
+                    "export",
+                    str(exe),
+                    "--instr-profile",
+                    str(merged),
+                    "--format=lcov",
+                ],
+                stdout=lcov_dst,
+            )
+    # Process the code coverage data with grcov to generate reports.
+    subprocess.check_call(
+        [
+            _nix_build(
+                ctx,
+                "grcov",
+                [
+                    str(ROOT / "etc/nix/pkgs.nix"),
+                    "-A",
+                    "grcov",
+                ],
+            )
+            / "bin"
+            / "grcov",
+            lcov_data,
+            "--llvm-path",
+            str(llvm_bin),
+            "-s",
+            ".",
+            "-o",
+            coverage_out,
+            "--ignore",
+            Path.home() / ".cargo/**",
+            "--output-types",
+            "html,cobertura,covdir",
+        ],
+        cwd=ROOT,
+    )
+    split_cobertura(coverage_out / "cobertura.xml", coverage_out / "coverage-split")
 
 
 @ci.command()

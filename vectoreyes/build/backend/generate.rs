@@ -103,9 +103,13 @@ fn implementation(backends: &Backends) -> TokenStream {
         let variant = format_ident!("{}", backend.vector_backend_variant());
         quote! { crate::VectorBackend::#variant }
     });
+    let vector_backend_check_cpu = backends.block(&mut |backend| backend.check_cpu());
     out.append_all(quote! {
         pub(crate) const fn current_vector_backend() -> crate::VectorBackend {
             #current_vector_backend
+        }
+        pub(crate) fn vector_backend_check_cpu() {
+            #vector_backend_check_cpu
         }
     });
     let internals = backends.define_module(format_ident!("internals"), &mut |backend| {

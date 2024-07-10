@@ -93,6 +93,17 @@ impl Neon {
     }
 }
 impl VectorBackend for Neon {
+    fn check_cpu(&self) -> TokenStream {
+        let required_features = REQUIRED_FEATURES;
+        quote! {#(
+            assert!(
+                std::arch::is_aarch64_feature_detected!(#required_features),
+                "This binary was compiled assuming {:?}, but the current CPU doesn't support that",
+                #required_features,
+            );
+        )*}
+    }
+
     fn scalar_docs(&self) -> Docs {
         "# Neon\nThis function uses a scalar polyfill.\n".to_string()
     }

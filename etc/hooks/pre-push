@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Copy this file into `.git/hooks/` to enable its use:
+#  `$> cp etc/hooks/* .git/hooks`
+
+# All Clippy errors and warnings must be fixed prior to a push.
+# Comment out this next line if you have enabled it in the `pre-commit` hook
+cargo clippy -- -Dwarnings
+
+# It is preferable to run all tests before pushing, but note this can be long
+# If you'd like to enable this check, uncomment the next line
+# cargo test

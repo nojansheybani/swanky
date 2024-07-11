@@ -34,6 +34,25 @@ Before you start writing code, start by planning it out, ideally with the rest o
 
 For most cases, design docs should live as Gitlab issues, to allow people to comment on them. When the design is implemented, the content of the design document (not necessarily verbatim) should be included in the merge request, ideally as part of the rustdoc for the module.
 
+### Commit Practices / Invariants
+
+In order to facilitate improved knowledge transfer, ease of code review and debugging and traceability of code changes, commits should have:
+
+* A descriptive title: starting with a prefix that indicates the module or overarching feature that the commit pertains to, followed by a colon, ":", and finished with a brief summary
+  * Use present tense / active voice for commit title
+* Motivation and needed details about the change following the title (some commits may not need this, but more context is usually better)
+* The following invariants:
+  * All commits should compile, be formatted, and pass linting checks
+  * The last commit in a branch should pass all Clippy checks
+
+We have `pre-commit` and `pre-push` Git hooks found in `etc/hooks` that enforce the commit invariants listed above. Tell Git to use these hooks by copying them into the `.git/hooks` directory inside your cloned repository:
+
+```bash
+$> cp etc/hooks/* .git/hooks
+```
+
+There are additional recommended checks found in `pre-commit` and `pre-push` that can be uncommented out to enabled. See files for details.
+
 ### Merge Requests
 
 _Every_ change to the Swanky git repo should be applied via a Merge Request. Before the change can be merged in, it must pass code review, and it must pass our Continuous Integration checks.

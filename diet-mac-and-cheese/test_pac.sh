@@ -4,10 +4,10 @@
 set -e
 
 echo "Running test"
-cargo run --bin dietmc -- --text --relation zk-pac/sha256/sha256.rel --instance zk-pac/sha256/sha256.type0.ins --connection-addr 127.0.0.1:7876 --witness zk-pac/sha256/sha256.type0.wit &
+cargo run --bin dietmc -- --text --relation zk-pac/dct/dct.rel --instance zk-pac/dct/dct.type0.ins --connection-addr 127.0.0.1:7876 --witness zk-pac/dct/dct.type0.wit &
 pid_prv=$!
 
-cargo run --bin dietmc -- --text --relation zk-pac/sha256/sha256.rel --instance zk-pac/sha256/sha256.type0.ins --connection-addr 127.0.0.1:7876 &
+cargo run --bin dietmc -- --text --relation zk-pac/dct/dct.rel --instance zk-pac/dct/dct.type0.ins --connection-addr 127.0.0.1:7876 &
 pid_vrf=$!
 
 wait $pid_prv

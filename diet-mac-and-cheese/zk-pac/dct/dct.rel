@@ -1,0 +1,36 @@
+version 2.2.0;
+circuit;
+@plugin mux_v0;
+@type field 2305843009213693951;
+@type field 2;
+@convert(@out: 0:1, @in: 1:61);
+@convert(@out: 1:61, @in: 0:1);
+@begin
+  @function(mux, @out: 0:1, @in: 0:1, 0:1, 0:1)
+    @plugin(mux_v0, permissive);
+  $0 <- @private(0);
+  $1 <- @private(0);
+  $2 <- @private(0);
+  $3 <- @private(0);
+  $4 <- @private(0);
+  $5 <- @private(0);
+  $6 <- @private(0);
+  $7 <- @private(0);
+  $8 <- @private(0);
+  $9 <- @private(0);
+  $10 <- @add(0: $0, $9);
+  $11 <- @add(0: $1, $9);
+  $12 <- @add(0: $2, $9);
+  $13 <- @add(0: $3, $9);
+  $14 <- @add(0: $4, $9);
+  $15 <- @add(0: $5, $9);
+  $16 <- @add(0: $6, $9);
+  $17 <- @add(0: $7, $9);
+  $18 <- @add(0: $8, $9);
+  $19 <- @addc(0: $10, < 148586524943879925 >);
+  @assert_zero(0: $19);
+  $20 <- @addc(0: $11, < 1603470082470679126 >);
+  @assert_zero(0: $20);
+  $21 <- @addc(0: $12, < 859839630033945387 >);
+  @assert_zero(0: $21);
+@end

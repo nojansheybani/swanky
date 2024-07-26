@@ -1,6 +1,5 @@
 use std::{
     fs::File,
-    hash::BuildHasherDefault,
     io::{Read, Write},
     net::TcpStream,
     os::unix::prelude::FileExt,
@@ -462,7 +461,7 @@ pub fn new_reactor<P: Party>(
         keys,
         incoming_slots: Mutex::new(FxHashMap::with_capacity_and_hasher(
             INCOMING_SLOTS_DEFAULT_CAPACITY,
-            BuildHasherDefault::default(),
+            Default::default(),
         )),
         outgoing_challenges: match P::WHICH {
             WhichParty::Prover(e) => PartyEither::prover_new(e, ()),

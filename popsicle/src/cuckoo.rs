@@ -193,28 +193,3 @@ mod tests {
         }
     }
 }
-
-#[cfg(all(feature = "nightly", test))]
-mod benchmarks {
-    extern crate test;
-    use super::*;
-    use test::Bencher;
-
-    const SETSIZE: usize = 1 << 16;
-
-    #[bench]
-    fn bench_build(b: &mut Bencher) {
-        let inputs = (0..SETSIZE)
-            .map(|_| rand::random::<Block>())
-            .collect::<Vec<Block>>();
-        b.iter(|| CuckooHash::new(&inputs, 3));
-    }
-
-    #[bench]
-    fn bench_bin(b: &mut Bencher) {
-        let input = rand::random::<Block>();
-        let hidx = rand::random::<usize>() % 4;
-        let range = 53;
-        b.iter(|| CuckooHash::bin(input, hidx, range));
-    }
-}

@@ -14,6 +14,7 @@ scheme the FAEST spec, Figure 5.1, page 27:
    * `VC.Open()`, implemented as [`open`]
    * `VC.Reconstruct()`, implemented as [`reconstruct`]
    * `VC.Verify()`, implemented as [`verify`]
+
 It also implements the helper function `num_rec` Fig 3.2, page 16.
 
 We assume the $`\lambda`$ security parameter in the spec to be 128 as set in

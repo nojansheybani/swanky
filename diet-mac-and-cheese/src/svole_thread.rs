@@ -26,7 +26,7 @@ const SLEEP_TIME_DELTA: u64 = 20;
 ///    svole functionality together with a `SvoleAtomic` used at a producer.
 /// * `SvoleAtomicRoundRobin` is the structure used by the consumer of svoles which draws the
 ///    svoles by the threads in a round-robin fashion.
-
+///
 /// Multithreading Svole using some atomic data-structures.
 ///
 /// An Svole functionality can use this structure to store the generated correlations.

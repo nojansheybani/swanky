@@ -62,33 +62,3 @@ mod tests {
         let _ = compress_and_hash_inputs(&inputs, key);
     }
 }
-
-#[cfg(all(feature = "nightly", test))]
-mod benchmarks {
-    extern crate test;
-    use super::*;
-    use scuttlebutt::AesRng;
-    use test::Bencher;
-
-    const NTIMES: usize = 1 << 16;
-
-    #[bench]
-    fn bench_compress_and_hash_inputs_small(b: &mut Bencher) {
-        let mut rng = AesRng::new();
-        let key = rng.gen::<Block>();
-        let inputs = rand_vec_vec(NTIMES, 15, &mut rng);
-        b.iter(|| {
-            let _ = compress_and_hash_inputs(&inputs, key);
-        });
-    }
-
-    #[bench]
-    fn bench_compress_and_hash_inputs_large(b: &mut Bencher) {
-        let mut rng = AesRng::new();
-        let key = rng.gen::<Block>();
-        let inputs = rand_vec_vec(NTIMES, 32, &mut rng);
-        b.iter(|| {
-            let _ = compress_and_hash_inputs(&inputs, key);
-        });
-    }
-}

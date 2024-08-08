@@ -166,7 +166,7 @@ fn main() {
         outputs.into_inner().unwrap()
     };
     for (k, v) in outputs.iter() {
-        std::fs::write(&out_dir.join(k), v.as_bytes()).unwrap();
+        std::fs::write(out_dir.join(k), v.as_bytes()).unwrap();
     }
     if let Some(cache_entry) = cache_entry
         .as_ref()
@@ -174,7 +174,7 @@ fn main() {
     {
         let tmpdir = tempfile::TempDir::new_in(cache_entry.parent().unwrap()).unwrap();
         for (k, v) in outputs.iter() {
-            std::fs::write(&tmpdir.path().join(k), v.as_bytes()).unwrap();
+            std::fs::write(tmpdir.path().join(k), v.as_bytes()).unwrap();
         }
         std::fs::rename(tmpdir.into_path(), cache_entry).unwrap();
     }

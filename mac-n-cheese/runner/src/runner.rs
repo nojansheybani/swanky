@@ -1,6 +1,5 @@
 use std::{
     any::{type_name, Any},
-    hash::BuildHasherDefault,
     io::Write,
     sync::{
         atomic::{AtomicUsize, Ordering},
@@ -176,7 +175,7 @@ impl<P: Party> RunnerThread<P> {
                     .iter()
                     .map(|mai| mai.inputs().len())
                     .sum::<usize>(),
-            BuildHasherDefault::default(),
+            Default::default(),
         );
         // If a task is listed multiple times as an input, we'll end up overwriting that entry in
         // the hash map. It's important that we call take_one() on self.task_outputs for each input
@@ -425,10 +424,8 @@ pub fn run_proof_background<P: Party>(
         .context("base vole")?;
     span.finish();
     // initialize task kinds
-    let mut task_definitions = FxHashMap::with_capacity_and_hasher(
-        manifest.task_kinds_used().len(),
-        BuildHasherDefault::default(),
-    );
+    let mut task_definitions =
+        FxHashMap::with_capacity_and_hasher(manifest.task_kinds_used().len(), Default::default());
     debug_assert_eq!(manifest.task_kinds_used().len(), vole_contexts.len());
     for (tk_encoded, vc) in manifest
         .task_kinds_used()

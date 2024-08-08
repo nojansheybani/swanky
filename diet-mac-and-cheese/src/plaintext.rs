@@ -100,14 +100,6 @@ where
         Ok(Self::FieldElement::random(&mut self.rng))
     }
 
-    fn one(&self) -> Result<Self::FieldElement> {
-        Ok(Self::FieldElement::ONE)
-    }
-
-    fn zero(&self) -> Result<Self::FieldElement> {
-        Ok(Self::FieldElement::ZERO)
-    }
-
     fn constant(&mut self, val: Self::FieldElement) -> Result<Self::Wire> {
         self.input_public(val)
     }

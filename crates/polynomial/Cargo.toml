@@ -10,4 +10,6 @@ version.workspace = true
 workspace = true
 
 [dependencies]
-# my_dependency.workspace = true
+rand.workspace = true
+subtle.workspace = true
+swanky-field.workspace = true

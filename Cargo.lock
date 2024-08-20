@@ -2466,6 +2466,11 @@ dependencies = [
 [[package]]
 name = "swanky-polynomial"
 version = "0.6.0"
+dependencies = [
+ "rand",
+ "subtle",
+ "swanky-field",
+]
 
 [[package]]
 name = "swanky-serialization"

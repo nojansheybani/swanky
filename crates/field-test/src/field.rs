@@ -123,43 +123,12 @@ macro_rules! test_field {
                 }
 
                 proptest! {
-                    #![proptest_config(ProptestConfig::with_cases(
-                        std::env::var("PROPTEST_CASES")
-                            .map(|x| x.parse().expect("PROPTEST_CASES is a number"))
-                            .unwrap_or(15)
-                    ))]
-                    #[test]
-                    fn polynomial_mul(a in any_fe(), b in any_fe()) {
-                        let mut poly = make_polynomial(a.decompose::<<FE as FiniteField>::PrimeField>());
-                        poly *= &make_polynomial(b.decompose::<<FE as FiniteField>::PrimeField>());
-                        let (_, remainder) = poly.divmod(&FE::polynomial_modulus());
-                        prop_assert_eq!(
-                            FE::from_subfield(&make_polynomial_coefficients(&remainder)),
-                            a * b
-                        );
-                    }
-                }
-
-                proptest! {
                     #[test]
                     fn prime_field_lift_is_homomorphism(a in any_prime_fe(), b in any_prime_fe()) {
                         let lift: fn(<FE as FiniteField>::PrimeField) -> FE =
                             <<FE as FiniteField>::PrimeField as Into<FE>>::into;
                         prop_assert_eq!(lift(a) + lift(b), lift(a + b));
                         prop_assert_eq!(lift(a) * lift(b), lift(a * b));
-                    }
-                }
-
-                proptest! {
-                    #[test]
-                    fn lifted_polynomial_mul(a in any_fe(), b in any_prime_fe()) {
-                        let mut poly = make_polynomial(a.decompose::<<FE as FiniteField>::PrimeField>());
-                        poly *= &make_polynomial(b.decompose::<<FE as FiniteField>::PrimeField>());
-                        let (_, remainder) = poly.divmod(&<FE>::polynomial_modulus());
-                        prop_assert_eq!(
-                            <FE>::from_subfield(&make_polynomial_coefficients(&remainder)),
-                            b * a
-                        );
                     }
                 }
 

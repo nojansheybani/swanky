@@ -12,6 +12,20 @@ use crate::{F128b, F2};
 #[derive(Debug, Clone, Copy, Hash, Eq)]
 pub struct F8b(u8);
 
+/// Return the reduction polynomial for the field `F8b`.
+#[allow(clippy::eq_op)]
+pub fn polynomial_modulus_f8b() -> Polynomial<F2> {
+    let mut coefficients = vec![F2::ZERO; 8];
+    coefficients[8 - 1] = F2::ONE;
+    coefficients[4 - 1] = F2::ONE;
+    coefficients[3 - 1] = F2::ONE;
+    coefficients[1 - 1] = F2::ONE;
+    Polynomial {
+        constant: F2::ONE,
+        coefficients,
+    }
+}
+
 impl ConstantTimeEq for F8b {
     fn ct_eq(&self, other: &Self) -> Choice {
         self.0.ct_eq(&other.0)
@@ -92,18 +106,6 @@ impl FiniteRing for F8b {
 }
 impl FiniteField for F8b {
     type PrimeField = F2;
-    #[allow(clippy::eq_op)]
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-        let mut coefficients = vec![F2::ZERO; 8];
-        coefficients[8 - 1] = F2::ONE;
-        coefficients[4 - 1] = F2::ONE;
-        coefficients[3 - 1] = F2::ONE;
-        coefficients[1 - 1] = F2::ONE;
-        Polynomial {
-            constant: F2::ONE,
-            coefficients,
-        }
-    }
     /// The generator is $`g^4 + g + 1`$
     const GENERATOR: Self = Self(0b10011);
     type NumberOfBitsInBitDecomposition = generic_array::typenum::U8;

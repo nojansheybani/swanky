@@ -12,6 +12,20 @@ use vectoreyes::{SimdBase, U64x2};
 #[derive(Debug, Clone, Copy, Hash, Eq)]
 pub struct F64b(u64);
 
+/// Return the reduction polynomial for the field `F64b`.
+#[allow(clippy::eq_op)]
+pub fn polynomial_modulus_f64b() -> Polynomial<F2> {
+    let mut coefficients = vec![F2::ZERO; 64];
+    coefficients[64 - 1] = F2::ONE;
+    coefficients[19 - 1] = F2::ONE;
+    coefficients[16 - 1] = F2::ONE;
+    coefficients[1 - 1] = F2::ONE;
+    Polynomial {
+        constant: F2::ONE,
+        coefficients,
+    }
+}
+
 impl F64b {
     #[inline(always)]
     fn reduce(product: U64x2) -> Self {
@@ -119,19 +133,6 @@ impl FiniteRing for F64b {
 
 impl FiniteField for F64b {
     type PrimeField = F2;
-
-    #[allow(clippy::eq_op)]
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-        let mut coefficients = vec![F2::ZERO; 64];
-        coefficients[64 - 1] = F2::ONE;
-        coefficients[19 - 1] = F2::ONE;
-        coefficients[16 - 1] = F2::ONE;
-        coefficients[1 - 1] = F2::ONE;
-        Polynomial {
-            constant: F2::ONE,
-            coefficients,
-        }
-    }
 
     type NumberOfBitsInBitDecomposition = generic_array::typenum::U64;
 

@@ -87,7 +87,7 @@ macro_rules! prime_field_using_ff {
         $(single_limb_modulus = $single_limb_modulus: expr)?
     ) => {
         mod $mod_name {
-            use swanky_field::{FiniteField, polynomial::Polynomial, PrimeFiniteField, FiniteRing};
+            use swanky_field::{FiniteField, PrimeFiniteField, FiniteRing};
             use swanky_serialization::{CanonicalSerialize, BiggerThanModulus};
             use ff::{Field, PrimeField};
             use generic_array::{typenum::Unsigned, GenericArray};
@@ -206,10 +206,6 @@ macro_rules! prime_field_using_ff {
                 };
 
                 type PrimeField = Self;
-
-                fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-                    Polynomial::x()
-                }
 
                 type NumberOfBitsInBitDecomposition = $num_bits;
 

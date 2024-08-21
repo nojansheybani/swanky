@@ -1,9 +1,6 @@
 //! This module defines finite fields.
 
-use crate::{
-    polynomial::Polynomial,
-    ring::{FiniteRing, IsSubRingOf},
-};
+use crate::ring::{FiniteRing, IsSubRingOf};
 use crypto_bigint::{Limb, Uint};
 use generic_array::typenum;
 use generic_array::{typenum::Unsigned, ArrayLength, GenericArray};
@@ -14,8 +11,6 @@ use subtle::CtOption;
 pub trait FiniteField: FiniteRing + DivAssign<Self> + Div<Self, Output = Self> {
     /// The prime-order subfield of the finite field.
     type PrimeField: PrimeFiniteField + IsSubFieldOf<Self>;
-    /// Multiplication over field elements should be reduced over this polynomial.
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField>;
 
     /// The generator for the multiplicative group.
     const GENERATOR: Self;

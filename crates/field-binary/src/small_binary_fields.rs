@@ -53,7 +53,6 @@ macro_rules! small_binary_field {
         $(#[$m:meta])*
         $name:ident, $mod_name:ident,
         num_bits = $num_bits:ty,
-        polynomial_modulus = $modulus_fn:ident,
         reduce = $reduce_fn:ident,
         $(reduce_vectored = $reduce_vectored_fn:ident)?
     ) => {
@@ -156,10 +155,6 @@ macro_rules! small_binary_field {
 
             // This corresponds to the polynomial P(x) = x
             const GENERATOR: Self = $name(0b10);
-
-            fn polynomial_modulus() -> swanky_field::polynomial::Polynomial<Self::PrimeField> {
-                $modulus_fn()
-            }
 
             type NumberOfBitsInBitDecomposition = $num_bits;
 
@@ -305,8 +300,9 @@ where
     )
 }
 
+/// Return the reduction polynomial for the field `F63b`.
 #[allow(clippy::eq_op)]
-fn polynomial_modulus_f63b() -> Polynomial<F2> {
+pub fn polynomial_modulus_f63b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 63];
     coefficients[63 - 1] = F2::ONE;
     coefficients[1 - 1] = F2::ONE;
@@ -321,7 +317,6 @@ small_binary_field!(
     F63b,
     f63b,
     num_bits = generic_array::typenum::U63,
-    polynomial_modulus = polynomial_modulus_f63b,
     reduce = reduce_f63b,
     reduce_vectored = reduce_vectored_f63b
 );
@@ -349,8 +344,9 @@ fn reduce_f56b(product: U64x2) -> F56b {
     F56b(reduced)
 }
 
+/// Return the reduction polynomial for the field `F56b`.
 #[allow(clippy::eq_op)]
-fn polynomial_modulus_f56b() -> Polynomial<F2> {
+pub fn polynomial_modulus_f56b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 56];
     coefficients[56 - 1] = F2::ONE;
     coefficients[8 - 1] = F2::ONE;
@@ -367,7 +363,6 @@ small_binary_field!(
     F56b,
     f56b,
     num_bits = generic_array::typenum::U56,
-    polynomial_modulus = polynomial_modulus_f56b,
     reduce = reduce_f56b,
 );
 
@@ -384,8 +379,9 @@ fn reduce_f40b(product: U64x2) -> F40b {
     F40b(lower_mask & r_lower)
 }
 
+/// Return the reduction polynomial for the field `F40b`.
 #[allow(clippy::eq_op)]
-fn polynomial_modulus_f40b() -> Polynomial<F2> {
+pub fn polynomial_modulus_f40b() -> Polynomial<F2> {
     // x^40 + x^5 + x^4 + x^3 + 1
     let mut coefficients = vec![F2::ZERO; 40];
     coefficients[40 - 1] = F2::ONE;
@@ -403,7 +399,6 @@ small_binary_field!(
     F40b,
     f40b,
     num_bits = generic_array::typenum::U40,
-    polynomial_modulus = polynomial_modulus_f40b,
     reduce = reduce_f40b,
 );
 
@@ -427,8 +422,9 @@ fn reduce_f45b(wide_product: U64x2) -> F45b {
     )
 }
 
+/// Return the reduction polynomial for the field `F45b`.
 #[allow(clippy::eq_op)]
-fn polynomial_modulus_f45b() -> Polynomial<F2> {
+pub fn polynomial_modulus_f45b() -> Polynomial<F2> {
     //X2^45 + X2^28 + X2^17 + X2^11 + 1
     let mut coefficients = vec![F2::ZERO; 128];
     coefficients[45 - 1] = F2::ONE;
@@ -446,6 +442,5 @@ small_binary_field!(
     F45b,
     f45b,
     num_bits = generic_array::typenum::U45,
-    polynomial_modulus = polynomial_modulus_f45b,
     reduce = reduce_f45b,
 );

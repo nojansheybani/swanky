@@ -16,6 +16,20 @@ use vectoreyes::U8x16;
 // We use a u128 since Rust will pass it in registers, unlike a __m128i
 pub struct F128b(pub(crate) u128);
 
+/// Return the reduction polynomial for the field `F128b`.
+#[allow(clippy::eq_op)]
+pub fn polynomial_modulus_f128b() -> Polynomial<<F128b as FiniteField>::PrimeField> {
+    let mut coefficients = vec![F2::ZERO; 128];
+    coefficients[128 - 1] = F2::ONE;
+    coefficients[7 - 1] = F2::ONE;
+    coefficients[2 - 1] = F2::ONE;
+    coefficients[1 - 1] = F2::ONE;
+    Polynomial {
+        constant: F2::ONE,
+        coefficients,
+    }
+}
+
 impl ConstantTimeEq for F128b {
     fn ct_eq(&self, other: &Self) -> Choice {
         self.0.ct_eq(&other.0)
@@ -84,7 +98,7 @@ mod multiply {
 
     #[cfg(test)]
     mod test {
-        use crate::{F128b, F2};
+        use crate::{polynomial_modulus_f128b, F128b, F2};
         use proptest::prelude::*;
         use swanky_field::{polynomial::Polynomial, FiniteField};
         use vectoreyes::U8x16;
@@ -136,7 +150,7 @@ mod multiply {
             remainder: &Polynomial<F2>,
         ) {
             let mut tmp = quotient.clone();
-            tmp *= &F128b::polynomial_modulus();
+            tmp *= &polynomial_modulus_f128b();
             tmp += remainder;
             assert_eq!(poly, &tmp);
         }
@@ -151,7 +165,7 @@ mod multiply {
             fn reduction(upper in any::<u128>(), lower in any::<u128>()) {
                 let poly = poly_from_upper_and_lower_128(upper, lower);
                 let reduced = super::reduce(upper, lower);
-                let (poly_quotient, poly_reduced) = poly.divmod(&F128b::polynomial_modulus());
+                let (poly_quotient, poly_reduced) = poly.divmod(&polynomial_modulus_f128b());
                 assert_div_mod(&poly, &poly_quotient, &poly_reduced);
                 assert_eq!(poly_from_128(reduced), poly_reduced);
             }
@@ -205,19 +219,6 @@ impl FiniteField for F128b {
     type PrimeField = F2;
 
     const GENERATOR: Self = F128b(2);
-
-    #[allow(clippy::eq_op)]
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-        let mut coefficients = vec![F2::ZERO; 128];
-        coefficients[128 - 1] = F2::ONE;
-        coefficients[7 - 1] = F2::ONE;
-        coefficients[2 - 1] = F2::ONE;
-        coefficients[1 - 1] = F2::ONE;
-        Polynomial {
-            constant: F2::ONE,
-            coefficients,
-        }
-    }
 
     type NumberOfBitsInBitDecomposition = generic_array::typenum::U128;
 

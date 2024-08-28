@@ -13,6 +13,7 @@ workspace = true
 [dependencies]
 generic-array.workspace = true
 swanky-field.workspace = true
+swanky-polynomial.workspace = true
 swanky-serialization.workspace = true
 rand_core.workspace = true
 rand.workspace = true

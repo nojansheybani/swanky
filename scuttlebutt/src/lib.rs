@@ -19,7 +19,7 @@ pub mod utils;
 /// A polyfill for the `swanky-field*` family of crates.
 pub mod field {
     pub use swanky_field::{
-        field_ops, polynomial, Degree, DegreeModulo, FiniteField, IsSubFieldOf, PrimeFiniteField,
+        field_ops, Degree, DegreeModulo, FiniteField, IsSubFieldOf, PrimeFiniteField,
     };
     pub use swanky_field_binary::*;
     pub use swanky_field_f61p::*;

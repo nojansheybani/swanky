@@ -23,6 +23,7 @@ parking_lot.workspace = true
 rand.workspace = true
 rayon.workspace = true
 scuttlebutt.workspace = true
+swanky-polynomial.workspace = true
 serde = { workspace = true, features = ["derive"] }
 simple-arith-circuit = { workspace = true, features = ["serde"] }
 snafu.workspace = true

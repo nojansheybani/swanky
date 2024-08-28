@@ -1026,6 +1026,7 @@ dependencies = [
  "simple-arith-circuit",
  "sprs",
  "subtle",
+ "swanky-polynomial",
 ]
 
 [[package]]
@@ -1065,6 +1066,7 @@ dependencies = [
  "serde_json",
  "simple-arith-circuit",
  "snafu",
+ "swanky-polynomial",
 ]
 
 [[package]]
@@ -2385,6 +2387,7 @@ dependencies = [
  "subtle",
  "swanky-field",
  "swanky-field-test",
+ "swanky-polynomial",
  "swanky-serialization",
  "vectoreyes",
 ]
@@ -2445,6 +2448,7 @@ dependencies = [
  "generic-array 1.1.0",
  "proptest",
  "swanky-field",
+ "swanky-polynomial",
  "swanky-serialization",
 ]
 

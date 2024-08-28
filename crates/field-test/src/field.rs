@@ -1,5 +1,6 @@
 use proptest::strategy::Strategy;
-use swanky_field::{polynomial::Polynomial, FiniteField};
+use swanky_field::FiniteField;
+use swanky_polynomial::Polynomial;
 
 use crate::arbitrary_ring;
 

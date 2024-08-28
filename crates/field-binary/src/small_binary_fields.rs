@@ -4,8 +4,8 @@ use generic_array::{typenum::Unsigned, GenericArray};
 use std::iter::FromIterator;
 use std::ops::{AddAssign, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
-use swanky_field::polynomial::Polynomial;
 use swanky_field::{Degree, FiniteField, FiniteRing};
+use swanky_polynomial::Polynomial;
 use vectoreyes::{
     array_utils::{ArrayUnrolledExt, ArrayUnrolledOps, UnrollableArraySize},
     SimdBase, U64x2,

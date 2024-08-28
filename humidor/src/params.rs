@@ -11,7 +11,7 @@ use ndarray::{concatenate, Array1, Array2, ArrayView1, ArrayView2, Axis, Zip};
 use rand::{CryptoRng, Rng};
 use scuttlebutt::field::fft;
 use scuttlebutt::field::fft::FieldForFFT;
-use scuttlebutt::field::polynomial::Polynomial;
+use swanky_polynomial::Polynomial;
 
 /// Parameters for interleaved coding, based on the size of the circuit and
 /// input. Note that these variable names, although terse, correspond to those

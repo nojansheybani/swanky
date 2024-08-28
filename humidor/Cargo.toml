@@ -25,6 +25,7 @@ num-traits.workspace = true
 rand.workspace = true
 subtle.workspace = true
 scuttlebutt.workspace = true
+swanky-polynomial.workspace = true
 generic-array.workspace = true
 digest.workspace = true
 simple-arith-circuit = { workspace = true, features = ["serde"] }

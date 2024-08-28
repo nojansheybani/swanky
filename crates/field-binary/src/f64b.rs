@@ -4,7 +4,8 @@ use rand::Rng;
 use std::iter::FromIterator;
 use std::ops::{AddAssign, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
-use swanky_field::{polynomial::Polynomial, FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
+use swanky_field::{FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
+use swanky_polynomial::Polynomial;
 use swanky_serialization::{BytesDeserializationCannotFail, CanonicalSerialize};
 use vectoreyes::{SimdBase, U64x2};
 

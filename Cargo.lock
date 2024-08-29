@@ -701,6 +701,7 @@ dependencies = [
  "swanky-field-ff-primes",
  "swanky-flatbuffer-build",
  "swanky-party",
+ "swanky-polynomial",
  "toml",
 ]
 

@@ -101,7 +101,8 @@ mod multiply {
     mod test {
         use crate::{polynomial_modulus_f128b, F128b, F2};
         use proptest::prelude::*;
-        use swanky_field::{polynomial::Polynomial, FiniteField};
+        use swanky_field::FiniteField;
+        use swanky_polynomial::Polynomial;
         use vectoreyes::U8x16;
 
         fn poly_from_upper_and_lower_128(upper: u128, lower: u128) -> Polynomial<F2> {

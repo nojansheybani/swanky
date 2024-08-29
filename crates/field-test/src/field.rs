@@ -34,7 +34,8 @@ macro_rules! test_field {
                 use $crate::__internal_macro_exports::*;
                 use proptest::prelude::*;
                 use generic_array::{GenericArray, ArrayLength, typenum::Unsigned};
-                use swanky_field::{Degree, FiniteField, FiniteRing, PrimeFiniteField, polynomial::Polynomial};
+                use swanky_field::{Degree, FiniteField, FiniteRing, PrimeFiniteField};
+                use swanky_polynomial::Polynomial;
                 use swanky_serialization::CanonicalSerialize;
 
                 type PF = <FE as FiniteField>::PrimeField;

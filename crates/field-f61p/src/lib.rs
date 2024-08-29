@@ -205,7 +205,7 @@ mod tests {
     use super::*;
     use proptest::prelude::*;
 
-    swanky_field_test::test_field!(test_field, F61p);
+    swanky_field_test::test_field!(test_field, F61p, Polynomial::x);
 
     #[cfg(test)]
     proptest! {

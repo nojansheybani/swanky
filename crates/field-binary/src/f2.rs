@@ -302,5 +302,5 @@ mod tests {
     test_binop!(test_sub, sub_assign);
     test_binop!(test_mul, mul_assign);
 
-    swanky_field_test::test_field!(test_field, F2);
+    swanky_field_test::test_field!(test_field, F2, Polynomial::x);
 }

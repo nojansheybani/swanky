@@ -291,7 +291,7 @@ macro_rules! prime_field_using_ff {
             swanky_field::field_ops!($name);
 
             #[cfg(test)]
-            swanky_field_test::test_field!(test_field, $name);
+            swanky_field_test::test_field!(test_field, $name, Polynomial::x);
 
             #[cfg(test)]
             mod tests {

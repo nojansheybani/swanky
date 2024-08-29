@@ -274,7 +274,7 @@ swanky_field::field_ops!(F128b);
 #[cfg(test)]
 mod tests {
     use super::F128b;
-    swanky_field_test::test_field!(test_field, F128b);
+    swanky_field_test::test_field!(test_field, F128b, crate::polynomial_modulus_f128b);
 }
 
 #[test]

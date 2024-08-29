@@ -355,7 +355,7 @@ mod tests {
         }
     }
 
-    swanky_field_test::test_field!(test_field, F8b);
+    swanky_field_test::test_field!(test_field, F8b, crate::polynomial_modulus_f8b);
 
     fn any_f8b() -> impl Strategy<Value = F8b> {
         arbitrary_ring::<F8b>()

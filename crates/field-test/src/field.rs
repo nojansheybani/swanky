@@ -22,7 +22,7 @@ pub fn arbitrary_polynomial<FE: FiniteField>() -> impl Strategy<Value = Polynomi
 /// arbitrary module name used to namespace the tests, and `MyFunField` is the field to test.
 #[macro_export]
 macro_rules! test_field {
-    ($tests_name:ident, $fe:ty) => {
+    ($tests_name:ident, $fe:ty, $polynomial_modulus:path) => {
         mod $tests_name {
             use super::*;
             type FE = $fe;
@@ -134,7 +134,7 @@ macro_rules! test_field {
                     fn polynomial_mul(a in any_fe(), b in any_fe()) {
                         let mut poly = make_polynomial(a.decompose::<<FE as FiniteField>::PrimeField>());
                         poly *= &make_polynomial(b.decompose::<<FE as FiniteField>::PrimeField>());
-                        let (_, remainder) = poly.divmod(&FE::polynomial_modulus());
+                        let (_, remainder) = poly.divmod(&$polynomial_modulus());
                         prop_assert_eq!(
                             FE::from_subfield(&make_polynomial_coefficients(&remainder)),
                             a * b
@@ -157,7 +157,7 @@ macro_rules! test_field {
                     fn lifted_polynomial_mul(a in any_fe(), b in any_prime_fe()) {
                         let mut poly = make_polynomial(a.decompose::<<FE as FiniteField>::PrimeField>());
                         poly *= &make_polynomial(b.decompose::<<FE as FiniteField>::PrimeField>());
-                        let (_, remainder) = poly.divmod(&<FE>::polynomial_modulus());
+                        let (_, remainder) = poly.divmod(&$polynomial_modulus());
                         prop_assert_eq!(
                             <FE>::from_subfield(&make_polynomial_coefficients(&remainder)),
                             b * a

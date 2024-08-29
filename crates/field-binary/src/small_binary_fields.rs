@@ -53,6 +53,7 @@ macro_rules! small_binary_field {
         $(#[$m:meta])*
         $name:ident, $mod_name:ident,
         num_bits = $num_bits:ty,
+        polynomial_modulus = $modulus_fn:path,
         reduce = $reduce_fn:ident,
         $(reduce_vectored = $reduce_vectored_fn:ident)?
     ) => {
@@ -267,7 +268,7 @@ macro_rules! small_binary_field {
                     prop_assert_eq!(b_reduced, $name::reduce(b).0);
                 }
             }
-            swanky_field_test::test_field!(test_field, $name);
+            swanky_field_test::test_field!(test_field, $name, $modulus_fn);
         }
     };
 }
@@ -317,6 +318,7 @@ small_binary_field!(
     F63b,
     f63b,
     num_bits = generic_array::typenum::U63,
+    polynomial_modulus = crate::polynomial_modulus_f63b,
     reduce = reduce_f63b,
     reduce_vectored = reduce_vectored_f63b
 );
@@ -363,6 +365,7 @@ small_binary_field!(
     F56b,
     f56b,
     num_bits = generic_array::typenum::U56,
+    polynomial_modulus = crate::polynomial_modulus_f56b,
     reduce = reduce_f56b,
 );
 
@@ -399,6 +402,7 @@ small_binary_field!(
     F40b,
     f40b,
     num_bits = generic_array::typenum::U40,
+    polynomial_modulus = crate::polynomial_modulus_f40b,
     reduce = reduce_f40b,
 );
 
@@ -442,5 +446,6 @@ small_binary_field!(
     F45b,
     f45b,
     num_bits = generic_array::typenum::U45,
+    polynomial_modulus = crate::polynomial_modulus_f45b,
     reduce = reduce_f45b,
 );

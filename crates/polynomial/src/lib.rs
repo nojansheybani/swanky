@@ -1,5 +1,6 @@
 //! This crate defines polynomials (and their operations) over finite fields.
 
+#![deny(missing_docs)]
 use rand::RngCore;
 use std::{
     fmt::Debug,

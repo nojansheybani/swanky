@@ -236,9 +236,8 @@ mod tests {
     use super::*;
     use generic_array::{typenum::U16, GenericArray};
     use proptest::{array::uniform16, prelude::*};
-    use swanky_field::IsSubFieldOf;
+    use swanky_field::{polynomial::Polynomial, IsSubFieldOf};
     use swanky_field_test::arbitrary_ring;
-    use swanky_polynomial::Polynomial;
     use vectoreyes::array_utils::ArrayUnrolledExt;
 
     /// Convenience method to convert from u8s to `F8b`s.

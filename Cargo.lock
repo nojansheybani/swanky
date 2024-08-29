@@ -701,7 +701,6 @@ dependencies = [
  "swanky-field-ff-primes",
  "swanky-flatbuffer-build",
  "swanky-party",
- "swanky-polynomial",
  "toml",
 ]
 
@@ -2405,7 +2404,6 @@ dependencies = [
  "subtle",
  "swanky-field",
  "swanky-field-test",
- "swanky-polynomial",
  "swanky-serialization",
 ]
 
@@ -2431,7 +2429,6 @@ dependencies = [
  "swanky-field",
  "swanky-field-fft",
  "swanky-field-test",
- "swanky-polynomial",
  "swanky-serialization",
  "tempfile",
 ]

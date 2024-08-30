@@ -3,7 +3,6 @@ use generic_array::{typenum::U128, GenericArray};
 use std::ops::{AddAssign, Mul, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
 use swanky_field::{FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
-use swanky_polynomial::Polynomial;
 use swanky_serialization::{BytesDeserializationCannotFail, CanonicalSerialize};
 use vectoreyes::{SimdBase, U64x2};
 
@@ -13,9 +12,13 @@ use crate::{F128b, F2};
 #[derive(Debug, Clone, Copy, Hash, Eq)]
 pub struct F8b(u8);
 
+#[cfg(test)]
+use swanky_polynomial::Polynomial;
+
 /// Return the reduction polynomial for the field `F8b`.
+#[cfg(test)]
 #[allow(clippy::eq_op)]
-pub fn polynomial_modulus_f8b() -> Polynomial<F2> {
+fn polynomial_modulus_f8b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 8];
     coefficients[8 - 1] = F2::ONE;
     coefficients[4 - 1] = F2::ONE;
@@ -355,7 +358,7 @@ mod tests {
         }
     }
 
-    swanky_field_test::test_field!(test_field, F8b, crate::polynomial_modulus_f8b);
+    swanky_field_test::test_field!(test_field, F8b, crate::f8b::polynomial_modulus_f8b);
 
     fn any_f8b() -> impl Strategy<Value = F8b> {
         arbitrary_ring::<F8b>()

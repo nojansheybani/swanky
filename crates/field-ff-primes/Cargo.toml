@@ -14,7 +14,6 @@ workspace = true
 generic-array.workspace = true
 swanky-field.workspace = true
 swanky-serialization.workspace = true
-swanky-polynomial.workspace = true
 rand_core.workspace = true
 rand.workspace = true
 rand_chacha.workspace = true
@@ -28,6 +27,7 @@ bytemuck.workspace = true
 
 [dev-dependencies]
 swanky-field-test.workspace = true
+swanky-polynomial.workspace = true
 proptest.workspace = true
 num-bigint.workspace = true
 

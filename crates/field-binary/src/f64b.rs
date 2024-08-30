@@ -5,7 +5,6 @@ use std::iter::FromIterator;
 use std::ops::{AddAssign, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
 use swanky_field::{FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
-use swanky_polynomial::Polynomial;
 use swanky_serialization::{BytesDeserializationCannotFail, CanonicalSerialize};
 use vectoreyes::{SimdBase, U64x2};
 
@@ -13,9 +12,13 @@ use vectoreyes::{SimdBase, U64x2};
 #[derive(Debug, Clone, Copy, Hash, Eq)]
 pub struct F64b(u64);
 
+#[cfg(test)]
+use swanky_polynomial::Polynomial;
+
 /// Return the reduction polynomial for the field `F64b`.
+#[cfg(test)]
 #[allow(clippy::eq_op)]
-pub fn polynomial_modulus_f64b() -> Polynomial<F2> {
+fn polynomial_modulus_f64b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 64];
     coefficients[64 - 1] = F2::ONE;
     coefficients[19 - 1] = F2::ONE;
@@ -192,5 +195,5 @@ impl IsSubFieldOf<F64b> for F2 {
 #[cfg(test)]
 mod tests {
     use super::F64b;
-    swanky_field_test::test_field!(test_field, F64b, crate::polynomial_modulus_f64b);
+    swanky_field_test::test_field!(test_field, F64b, crate::f64b::polynomial_modulus_f64b);
 }

@@ -5,7 +5,6 @@ use std::iter::FromIterator;
 use std::ops::{AddAssign, Mul, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
 use swanky_field::{FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
-use swanky_polynomial::Polynomial;
 use swanky_serialization::{
     ByteElementDeserializer, ByteElementSerializer, BytesDeserializationCannotFail,
     CanonicalSerialize,
@@ -17,9 +16,13 @@ use vectoreyes::U8x16;
 // We use a u128 since Rust will pass it in registers, unlike a __m128i
 pub struct F128b(pub(crate) u128);
 
+#[cfg(test)]
+use swanky_polynomial::Polynomial;
+
 /// Return the reduction polynomial for the field `F128b`.
+#[cfg(test)]
 #[allow(clippy::eq_op)]
-pub fn polynomial_modulus_f128b() -> Polynomial<<F128b as FiniteField>::PrimeField> {
+fn polynomial_modulus_f128b() -> Polynomial<<F128b as FiniteField>::PrimeField> {
     let mut coefficients = vec![F2::ZERO; 128];
     coefficients[128 - 1] = F2::ONE;
     coefficients[7 - 1] = F2::ONE;
@@ -99,7 +102,8 @@ mod multiply {
 
     #[cfg(test)]
     mod test {
-        use crate::{polynomial_modulus_f128b, F128b, F2};
+        use super::super::polynomial_modulus_f128b;
+        use crate::{F128b, F2};
         use proptest::prelude::*;
         use swanky_field::FiniteField;
         use swanky_polynomial::Polynomial;
@@ -274,7 +278,7 @@ swanky_field::field_ops!(F128b);
 #[cfg(test)]
 mod tests {
     use super::F128b;
-    swanky_field_test::test_field!(test_field, F128b, crate::polynomial_modulus_f128b);
+    swanky_field_test::test_field!(test_field, F128b, crate::f128b::polynomial_modulus_f128b);
 }
 
 #[test]

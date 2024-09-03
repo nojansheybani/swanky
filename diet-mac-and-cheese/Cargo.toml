@@ -37,6 +37,7 @@ swanky-field.workspace = true
 swanky-field-binary.workspace = true
 swanky-field-f61p.workspace = true
 swanky-field-ff-primes.workspace = true
+swanky-polynomial.workspace = true
 subtle.workspace = true
 ocelot.workspace = true
 flatbuffers.workspace = true

@@ -2,7 +2,7 @@ use generic_array::{typenum::U128, GenericArray};
 
 use std::ops::{AddAssign, Mul, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
-use swanky_field::{polynomial::Polynomial, FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
+use swanky_field::{FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
 use swanky_serialization::{BytesDeserializationCannotFail, CanonicalSerialize};
 use vectoreyes::{SimdBase, U64x2};
 
@@ -11,6 +11,24 @@ use crate::{F128b, F2};
 /// An element of the finite field $`\textsf{GF}({2^{8}})`$ reduced over $`x^8 + x^4 + x^3 + x + 1`$.
 #[derive(Debug, Clone, Copy, Hash, Eq)]
 pub struct F8b(u8);
+
+#[cfg(test)]
+use swanky_polynomial::Polynomial;
+
+/// Return the reduction polynomial for the field `F8b`.
+#[cfg(test)]
+#[allow(clippy::eq_op)]
+fn polynomial_modulus_f8b() -> Polynomial<F2> {
+    let mut coefficients = vec![F2::ZERO; 8];
+    coefficients[8 - 1] = F2::ONE;
+    coefficients[4 - 1] = F2::ONE;
+    coefficients[3 - 1] = F2::ONE;
+    coefficients[1 - 1] = F2::ONE;
+    Polynomial {
+        constant: F2::ONE,
+        coefficients,
+    }
+}
 
 impl ConstantTimeEq for F8b {
     fn ct_eq(&self, other: &Self) -> Choice {
@@ -92,18 +110,6 @@ impl FiniteRing for F8b {
 }
 impl FiniteField for F8b {
     type PrimeField = F2;
-    #[allow(clippy::eq_op)]
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-        let mut coefficients = vec![F2::ZERO; 8];
-        coefficients[8 - 1] = F2::ONE;
-        coefficients[4 - 1] = F2::ONE;
-        coefficients[3 - 1] = F2::ONE;
-        coefficients[1 - 1] = F2::ONE;
-        Polynomial {
-            constant: F2::ONE,
-            coefficients,
-        }
-    }
     /// The generator is $`g^4 + g + 1`$
     const GENERATOR: Self = Self(0b10011);
     type NumberOfBitsInBitDecomposition = generic_array::typenum::U8;
@@ -233,8 +239,9 @@ mod tests {
     use super::*;
     use generic_array::{typenum::U16, GenericArray};
     use proptest::{array::uniform16, prelude::*};
-    use swanky_field::{polynomial::Polynomial, IsSubFieldOf};
+    use swanky_field::IsSubFieldOf;
     use swanky_field_test::arbitrary_ring;
+    use swanky_polynomial::Polynomial;
     use vectoreyes::array_utils::ArrayUnrolledExt;
 
     /// Convenience method to convert from u8s to `F8b`s.
@@ -351,7 +358,7 @@ mod tests {
         }
     }
 
-    swanky_field_test::test_field!(test_field, F8b);
+    swanky_field_test::test_field!(test_field, F8b, crate::f8b::polynomial_modulus_f8b);
 
     fn any_f8b() -> impl Strategy<Value = F8b> {
         arbitrary_ring::<F8b>()

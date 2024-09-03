@@ -7,7 +7,6 @@ mod field;
 mod ring;
 pub use field::*;
 pub use ring::*;
-pub mod polynomial;
 
 /// Dependent crates might not neccessarily depend on `num_traits`, for example, themsevles.
 /// Nonetheless, macros written in _this_ crate need to be able to access `num_traits`, even when

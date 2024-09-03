@@ -4,7 +4,6 @@ use generic_array::{typenum::Unsigned, GenericArray};
 use std::iter::FromIterator;
 use std::ops::{AddAssign, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
-use swanky_field::polynomial::Polynomial;
 use swanky_field::{Degree, FiniteField, FiniteRing};
 use vectoreyes::{
     array_utils::{ArrayUnrolledExt, ArrayUnrolledOps, UnrollableArraySize},
@@ -28,10 +27,10 @@ pub unsafe trait SmallBinaryField:
     /// Produce a field element of `Self` by zeroing the upper bits of `x`.
     fn from_lower_bits(x: u64) -> Self;
     /// Reduce the result of a single 128-bit carryless multiply of two `Self` values modulo
-    /// [`FiniteField::polynomial_modulus()`]
+    /// the field's polynomial modulus.
     fn reduce(x: U64x2) -> Self;
     /// Reduce the result of several 128-bit carryless multiply operations over
-    /// [`FiniteField::polynomial_modulus()`].
+    /// the field's polynomial modulus.
     #[inline(always)]
     fn reduce_vectored<const N: usize>(uppers: [U64x2; N], lowers: [U64x2; N]) -> [U64x2; N]
     where
@@ -53,7 +52,7 @@ macro_rules! small_binary_field {
         $(#[$m:meta])*
         $name:ident, $mod_name:ident,
         num_bits = $num_bits:ty,
-        polynomial_modulus = $modulus_fn:ident,
+        polynomial_modulus = $modulus_fn:path,
         reduce = $reduce_fn:ident,
         $(reduce_vectored = $reduce_vectored_fn:ident)?
     ) => {
@@ -156,10 +155,6 @@ macro_rules! small_binary_field {
 
             // This corresponds to the polynomial P(x) = x
             const GENERATOR: Self = $name(0b10);
-
-            fn polynomial_modulus() -> swanky_field::polynomial::Polynomial<Self::PrimeField> {
-                $modulus_fn()
-            }
 
             type NumberOfBitsInBitDecomposition = $num_bits;
 
@@ -272,7 +267,7 @@ macro_rules! small_binary_field {
                     prop_assert_eq!(b_reduced, $name::reduce(b).0);
                 }
             }
-            swanky_field_test::test_field!(test_field, $name);
+            swanky_field_test::test_field!(test_field, $name, $modulus_fn);
         }
     };
 }
@@ -305,6 +300,11 @@ where
     )
 }
 
+#[cfg(test)]
+use swanky_polynomial::Polynomial;
+
+/// Return the reduction polynomial for the field `F63b`.
+#[cfg(test)]
 #[allow(clippy::eq_op)]
 fn polynomial_modulus_f63b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 63];
@@ -321,7 +321,7 @@ small_binary_field!(
     F63b,
     f63b,
     num_bits = generic_array::typenum::U63,
-    polynomial_modulus = polynomial_modulus_f63b,
+    polynomial_modulus = crate::small_binary_fields::polynomial_modulus_f63b,
     reduce = reduce_f63b,
     reduce_vectored = reduce_vectored_f63b
 );
@@ -349,6 +349,8 @@ fn reduce_f56b(product: U64x2) -> F56b {
     F56b(reduced)
 }
 
+/// Return the reduction polynomial for the field `F56b`.
+#[cfg(test)]
 #[allow(clippy::eq_op)]
 fn polynomial_modulus_f56b() -> Polynomial<F2> {
     let mut coefficients = vec![F2::ZERO; 56];
@@ -367,7 +369,7 @@ small_binary_field!(
     F56b,
     f56b,
     num_bits = generic_array::typenum::U56,
-    polynomial_modulus = polynomial_modulus_f56b,
+    polynomial_modulus = crate::small_binary_fields::polynomial_modulus_f56b,
     reduce = reduce_f56b,
 );
 
@@ -384,6 +386,8 @@ fn reduce_f40b(product: U64x2) -> F40b {
     F40b(lower_mask & r_lower)
 }
 
+/// Return the reduction polynomial for the field `F40b`.
+#[cfg(test)]
 #[allow(clippy::eq_op)]
 fn polynomial_modulus_f40b() -> Polynomial<F2> {
     // x^40 + x^5 + x^4 + x^3 + 1
@@ -403,7 +407,7 @@ small_binary_field!(
     F40b,
     f40b,
     num_bits = generic_array::typenum::U40,
-    polynomial_modulus = polynomial_modulus_f40b,
+    polynomial_modulus = crate::small_binary_fields::polynomial_modulus_f40b,
     reduce = reduce_f40b,
 );
 
@@ -427,6 +431,8 @@ fn reduce_f45b(wide_product: U64x2) -> F45b {
     )
 }
 
+/// Return the reduction polynomial for the field `F45b`.
+#[cfg(test)]
 #[allow(clippy::eq_op)]
 fn polynomial_modulus_f45b() -> Polynomial<F2> {
     //X2^45 + X2^28 + X2^17 + X2^11 + 1
@@ -446,6 +452,6 @@ small_binary_field!(
     F45b,
     f45b,
     num_bits = generic_array::typenum::U45,
-    polynomial_modulus = polynomial_modulus_f45b,
+    polynomial_modulus = crate::small_binary_fields::polynomial_modulus_f45b,
     reduce = reduce_f45b,
 );

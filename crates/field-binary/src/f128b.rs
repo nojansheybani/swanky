@@ -4,7 +4,7 @@ use rand::Rng;
 use std::iter::FromIterator;
 use std::ops::{AddAssign, Mul, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq};
-use swanky_field::{polynomial::Polynomial, FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
+use swanky_field::{FiniteField, FiniteRing, IsSubFieldOf, IsSubRingOf};
 use swanky_serialization::{
     ByteElementDeserializer, ByteElementSerializer, BytesDeserializationCannotFail,
     CanonicalSerialize,
@@ -15,6 +15,24 @@ use vectoreyes::U8x16;
 #[derive(Debug, Clone, Copy, Hash, Eq)]
 // We use a u128 since Rust will pass it in registers, unlike a __m128i
 pub struct F128b(pub(crate) u128);
+
+#[cfg(test)]
+use swanky_polynomial::Polynomial;
+
+/// Return the reduction polynomial for the field `F128b`.
+#[cfg(test)]
+#[allow(clippy::eq_op)]
+fn polynomial_modulus_f128b() -> Polynomial<<F128b as FiniteField>::PrimeField> {
+    let mut coefficients = vec![F2::ZERO; 128];
+    coefficients[128 - 1] = F2::ONE;
+    coefficients[7 - 1] = F2::ONE;
+    coefficients[2 - 1] = F2::ONE;
+    coefficients[1 - 1] = F2::ONE;
+    Polynomial {
+        constant: F2::ONE,
+        coefficients,
+    }
+}
 
 impl ConstantTimeEq for F128b {
     fn ct_eq(&self, other: &Self) -> Choice {
@@ -84,9 +102,11 @@ mod multiply {
 
     #[cfg(test)]
     mod test {
+        use super::super::polynomial_modulus_f128b;
         use crate::{F128b, F2};
         use proptest::prelude::*;
-        use swanky_field::{polynomial::Polynomial, FiniteField};
+        use swanky_field::FiniteField;
+        use swanky_polynomial::Polynomial;
         use vectoreyes::U8x16;
 
         fn poly_from_upper_and_lower_128(upper: u128, lower: u128) -> Polynomial<F2> {
@@ -136,7 +156,7 @@ mod multiply {
             remainder: &Polynomial<F2>,
         ) {
             let mut tmp = quotient.clone();
-            tmp *= &F128b::polynomial_modulus();
+            tmp *= &polynomial_modulus_f128b();
             tmp += remainder;
             assert_eq!(poly, &tmp);
         }
@@ -151,7 +171,7 @@ mod multiply {
             fn reduction(upper in any::<u128>(), lower in any::<u128>()) {
                 let poly = poly_from_upper_and_lower_128(upper, lower);
                 let reduced = super::reduce(upper, lower);
-                let (poly_quotient, poly_reduced) = poly.divmod(&F128b::polynomial_modulus());
+                let (poly_quotient, poly_reduced) = poly.divmod(&polynomial_modulus_f128b());
                 assert_div_mod(&poly, &poly_quotient, &poly_reduced);
                 assert_eq!(poly_from_128(reduced), poly_reduced);
             }
@@ -206,19 +226,6 @@ impl FiniteField for F128b {
 
     const GENERATOR: Self = F128b(2);
 
-    #[allow(clippy::eq_op)]
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-        let mut coefficients = vec![F2::ZERO; 128];
-        coefficients[128 - 1] = F2::ONE;
-        coefficients[7 - 1] = F2::ONE;
-        coefficients[2 - 1] = F2::ONE;
-        coefficients[1 - 1] = F2::ONE;
-        Polynomial {
-            constant: F2::ONE,
-            coefficients,
-        }
-    }
-
     type NumberOfBitsInBitDecomposition = generic_array::typenum::U128;
 
     fn bit_decomposition(&self) -> GenericArray<bool, Self::NumberOfBitsInBitDecomposition> {
@@ -271,7 +278,7 @@ swanky_field::field_ops!(F128b);
 #[cfg(test)]
 mod tests {
     use super::F128b;
-    swanky_field_test::test_field!(test_field, F128b);
+    swanky_field_test::test_field!(test_field, F128b, crate::f128b::polynomial_modulus_f128b);
 }
 
 #[test]

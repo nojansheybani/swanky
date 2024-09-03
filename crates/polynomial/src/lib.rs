@@ -1,12 +1,13 @@
-//! This module defines polynomials (and their operations) over finite fields.
+//! This crate defines polynomials (and their operations) over finite fields.
 
-use crate::field::FiniteField;
+#![deny(missing_docs)]
 use rand::RngCore;
 use std::{
     fmt::Debug,
     ops::{AddAssign, Index, IndexMut, MulAssign, SubAssign},
 };
 use subtle::{Choice, ConstantTimeEq};
+use swanky_field::FiniteField;
 
 // TODO: a lot of these algorithms are the naive implementations. We should improve them if speed
 // becomes an issue.

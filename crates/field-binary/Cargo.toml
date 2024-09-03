@@ -22,4 +22,5 @@ crypto-bigint.workspace = true
 
 [dev-dependencies]
 swanky-field-test.workspace = true
+swanky-polynomial.workspace = true
 proptest.workspace = true

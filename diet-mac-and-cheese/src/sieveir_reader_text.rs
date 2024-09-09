@@ -88,10 +88,7 @@ impl InputText {
 
 impl TapeT for InputText {
     fn pop(&mut self) -> Option<Number> {
-        match self.next_one() {
-            Ok(r) => r,
-            Err(_) => None,
-        }
+        self.next_one().unwrap_or_default()
     }
 
     fn pop_many(&mut self, num: u64) -> Option<Vec<Number>> {

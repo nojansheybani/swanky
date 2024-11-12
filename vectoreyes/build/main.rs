@@ -29,6 +29,8 @@ fn main() {
         // The last two characters are ")."
         let target_cpu = &native_line[last_whitespace + 1..native_line.len() - 2];
         if target_cpu != "apple-m1"
+            && target_cpu != "apple-m2"
+            && target_cpu != "apple-m3"
             && !lines.any(|line| {
                 line.split_ascii_whitespace()
                     .next()

@@ -822,7 +822,7 @@ impl TapeT for Tape {
 #[repr(transparent)]
 pub struct TapeF<'a, F>(&'a mut Box<dyn TapeT>, PhantomData<F>);
 
-impl<'a, F: FiniteField + SieveIrDeserialize> Iterator for TapeF<'a, F> {
+impl<F: FiniteField + SieveIrDeserialize> Iterator for TapeF<'_, F> {
     type Item = F;
 
     fn next(&mut self) -> Option<Self::Item> {

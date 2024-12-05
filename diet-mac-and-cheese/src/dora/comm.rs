@@ -161,7 +161,6 @@ pub(super) struct CommittedCrossTerms<B: BackendT> {
 }
 
 impl<
-        'a,
         P: Party,
         V: IsSubFieldOf<F>,
         F: FiniteField,
@@ -174,7 +173,7 @@ where
     pub fn commit(
         channel: &mut (impl AbstractChannel + Clone),
         backend: &mut DietMacAndCheese<P, V, F, C, SvoleF>,
-        disj: &'a Disjunction<V>,
+        disj: &Disjunction<V>,
         cxt: ProverPrivate<P, &CrossTerms<V>>,
     ) -> Result<Self> {
         let mut terms = Vec::with_capacity(disj.dim_err());

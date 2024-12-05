@@ -171,7 +171,7 @@ impl VectorBackend for Avx2 {
 }
 
 mod xml {
-    use serde::Deserialize;
+    use serde::{Deserialize, Deserializer};
     #[derive(Deserialize, Debug)]
     pub struct Root {
         pub intrinsic: Vec<Intrinsic>,
@@ -180,7 +180,11 @@ mod xml {
     pub struct Intrinsic {
         #[serde(rename = "@name")]
         pub name: String,
-        #[serde(rename = "@sequence")]
+        #[serde(
+            rename = "@sequence",
+            default,
+            deserialize_with = "deserialize_bool_permissive"
+        )]
         pub sequence: Option<bool>,
         #[serde(rename = "CPUID")]
         pub cpuid: Option<Vec<String>>,
@@ -192,6 +196,29 @@ mod xml {
         pub name: String,
         #[serde(rename = "@form")]
         pub form: Option<String>,
+    }
+
+    // quick-xml 0.37.0 fixed a bug in the Boolean handling, where it was too
+    // permissive (per the Xml Schema). Since the Intel intrinsics XML file uses
+    // these disallowed forms ("TRUE" and "FALSE"), we manually restore the
+    // previous functionality, per the table at
+    // https://github.com/tafia/quick-xml/releases/tag/v0.37.0
+    fn deserialize_bool_permissive<'de, D>(deserializer: D) -> Result<Option<bool>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s: Option<String> = Option::deserialize(deserializer)?;
+        match s {
+            None => Ok(None),
+            Some(s) => match s.to_lowercase().as_str() {
+                "true" | "t" | "yes" | "y" | "1" => Ok(Some(true)),
+                "false" | "f" | "no" | "n" | "0" => Ok(Some(false)),
+                s => Err(serde::de::Error::custom(format!(
+                    "Invalid Boolean string: {}",
+                    s
+                ))),
+            },
+        }
     }
 }
 

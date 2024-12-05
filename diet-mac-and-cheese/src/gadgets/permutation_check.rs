@@ -120,7 +120,7 @@ pub(crate) fn permutation_check_binary<M: MacT, B: BackendLiftT<Wire = M>>(
     tuple_size: usize,
 ) -> Result<()> {
     let nbits = <M::Tag as FiniteField>::NumberOfBitsInBitDecomposition::USIZE;
-    let new_tuple_size = (tuple_size + nbits - 1) / nbits;
+    let new_tuple_size = tuple_size.div_ceil(nbits);
     let packed_xs = Packer::<M, B, _>::new(xs, tuple_size);
     let packed_ys = Packer::<M, B, _>::new(ys, tuple_size);
     permutation_check::<B::LiftedBackend>(backend, packed_xs, packed_ys, ntuples, new_tuple_size)

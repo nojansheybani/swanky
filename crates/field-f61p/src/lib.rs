@@ -143,7 +143,6 @@ impl std::iter::Sum for F61p {
     //     }
     //     return a;
     // }
-
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         let mut out: u128 = 0;
         // Invariant: this code is correct if the length of the

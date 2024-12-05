@@ -15,13 +15,13 @@ impl<'a> From<&'a mut merlin::Transcript> for Transcript<'a> {
     }
 }
 
-impl<'a> AsMut<merlin::Transcript> for Transcript<'a> {
+impl AsMut<merlin::Transcript> for Transcript<'_> {
     fn as_mut(&mut self) -> &mut merlin::Transcript {
         self.0
     }
 }
 
-impl<'a> Transcript<'a> {
+impl Transcript<'_> {
     /// Put all the known public values into the transcript!
     ///
     /// This doesn't incorporate any representation of the circuit itself.

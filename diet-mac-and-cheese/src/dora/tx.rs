@@ -8,7 +8,7 @@ pub struct TxChannel<'a, C: AbstractChannel + Clone> {
     pub tx: &'a mut blake3::Hasher,
 }
 
-impl<'a, C: AbstractChannel + Clone> Clone for TxChannel<'a, C> {
+impl<C: AbstractChannel + Clone> Clone for TxChannel<'_, C> {
     fn clone(&self) -> Self
     where
         Self: Sized,
@@ -17,7 +17,7 @@ impl<'a, C: AbstractChannel + Clone> Clone for TxChannel<'a, C> {
     }
 }
 
-impl<'a, C: AbstractChannel + Clone> AbstractChannel for TxChannel<'a, C> {
+impl<C: AbstractChannel + Clone> AbstractChannel for TxChannel<'_, C> {
     fn read_bytes(&mut self, buf: &mut [u8]) -> Result<()> {
         self.ch.read_bytes(buf)?;
         self.tx.update(buf);

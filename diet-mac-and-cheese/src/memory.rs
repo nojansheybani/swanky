@@ -192,14 +192,14 @@ where
     fn get_ptr_when_in_cache(&self, id: WireId) -> WirePointer<X> {
         let cache = self.cache.borrow();
         unsafe {
-            return WirePointer(
+            WirePointer(
                 cache
                     .vector
                     .as_ref()
                     .unwrap()
                     .0
                     .offset((id - cache.first) as isize),
-            );
+            )
         }
     }
 
@@ -585,7 +585,7 @@ where
 
         // 2) b)
         debug!("get: {:?}", frame.memframe_unallocated.get(&id).unwrap());
-        return frame.memframe_unallocated.get(&id).unwrap();
+        frame.memframe_unallocated.get(&id).unwrap()
     }
 
     pub(crate) fn set(&mut self, id: WireId, x: &X) {

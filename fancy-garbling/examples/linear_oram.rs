@@ -68,7 +68,6 @@ where
 /// (4) The evaluator and the garbler open the result of the computation.
 /// (5) The evaluator translates the binary output of the circuit into its decimal
 ///     representation.
-
 fn ev_linear_oram<C>(rng: &mut AesRng, channel: &mut C, input: u128) -> u128
 where
     C: AbstractChannel + std::clone::Clone,

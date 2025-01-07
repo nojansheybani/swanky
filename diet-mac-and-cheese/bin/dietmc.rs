@@ -23,6 +23,7 @@ use std::net::{TcpListener, TcpStream};
 use std::path::PathBuf;
 use std::time::Instant;
 use swanky_party::{Party, Prover, Verifier, WhichParty};
+use std::io::Cursor;
 
 #[cfg(feature = "jemalloc")]
 use jemallocator::Jemalloc;
@@ -225,13 +226,13 @@ fn build_inputs_flatbuffers(args: &Cli) -> Result<(CircInputs, TypeStore)> {
 
 // Run singlethreaded
 fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
-    let start = Instant::now();
+    let start_load = Instant::now();
     let (inputs, type_store) = if is_text {
         build_inputs_types_text(args)?
     } else {
         build_inputs_flatbuffers(args)?
     };
-    info!("time reading ins/wit/rel: {:?}", start.elapsed());
+    info!("time reading ins/wit/rel: {:?}", start_load.elapsed());
 
     let relation_path = args.relation.clone();
     match args.witness {
@@ -244,7 +245,7 @@ fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> 
             let writer = BufWriter::new(stream);
             let mut channel = Channel::new(reader, writer);
 
-            let start = Instant::now();
+            let start_setup = Instant::now();
             let rng = AesRng::new();
 
             let mut evaluator =
@@ -257,9 +258,16 @@ fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> 
                     config.no_batching(),
                 )?;
             evaluator.load_backends(&mut channel, config.lpn())?;
-            info!("init time: {:?}", start.elapsed());
+            let setup_time = start_setup.elapsed();
+            info!("init time: {:?}", setup_time);
 
-            let start = Instant::now();
+            let start_verify = Instant::now();
+            let mut proof_size: usize = 0;
+            
+            // wrap the channel in a counting channel
+            let counting_channel = CountingChannel::new(channel);
+            let mut channel = counting_channel;
+            
             if is_text {
                 let relation_file = File::open(relation_path)?;
                 let relation_reader = BufReader::new(relation_file);
@@ -267,8 +275,16 @@ fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> 
             } else {
                 evaluator.evaluate_relation(&relation_path)?;
             }
-            info!("time circ exec: {:?}", start.elapsed());
+             proof_size = channel.bytes_sent() + channel.bytes_received();
+
+            let verify_time = start_verify.elapsed();
+            info!("time circ exec: {:?}", verify_time);
+             info!("proof size: {:?}", proof_size);
             info!("VERIFIER DONE!");
+             println!(
+            "Setup time: {:?}, Verifier time: {:?}, Proof size: {:?}",
+            setup_time, verify_time, proof_size
+        );
         }
         Some(_) => {
             // Prover mode
@@ -279,7 +295,7 @@ fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> 
             let writer = BufWriter::new(stream);
             let mut channel = Channel::new(reader, writer);
 
-            let start = Instant::now();
+            let start_setup = Instant::now();
             let rng = AesRng::new();
 
             let mut evaluator =
@@ -292,8 +308,15 @@ fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> 
                     config.no_batching(),
                 )?;
             evaluator.load_backends(&mut channel, config.lpn())?;
-            info!("init time: {:?}", start.elapsed());
-            let start = Instant::now();
+            let setup_time = start_setup.elapsed();
+            info!("init time: {:?}", setup_time);
+
+            let start_prove = Instant::now();
+            let mut proof_size: usize = 0;
+           // wrap the channel in a counting channel
+            let counting_channel = CountingChannel::new(channel);
+            let mut channel = counting_channel;
+            
             if is_text {
                 let relation_file = File::open(relation_path)?;
                 let relation_reader = BufReader::new(relation_file);
@@ -301,8 +324,16 @@ fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> 
             } else {
                 evaluator.evaluate_relation(&relation_path)?;
             }
-            info!("time circ exec: {:?}", start.elapsed());
+             proof_size = channel.bytes_sent() + channel.bytes_received();
+
+            let prove_time = start_prove.elapsed();
+             info!("time circ exec: {:?}", prove_time);
             info!("PROVER DONE!");
+             info!("proof size: {:?}", proof_size);
+             println!(
+            "Setup time: {:?}, Prover time: {:?}, Proof size: {:?}",
+            setup_time, prove_time, proof_size
+        );
         }
     }
     Ok(())
@@ -310,13 +341,13 @@ fn run_singlethreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> 
 
 // Run multithreaded
 fn run_multithreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
-    let start = Instant::now();
+    let start_load = Instant::now();
     let (inputs, type_store) = if is_text {
         build_inputs_types_text(args)?
     } else {
         build_inputs_flatbuffers(args)?
     };
-    info!("time reading ins/wit/rel: {:?}", start.elapsed());
+    info!("time reading ins/wit/rel: {:?}", start_load.elapsed());
 
     let addresses: Vec<String> = parse_addresses(args, config);
 
@@ -336,7 +367,7 @@ fn run_multithreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
                 bail!("cannot open first channel");
             };
 
-            let init_time = Instant::now();
+            let start_setup = Instant::now();
             let total_time = Instant::now();
 
             let rng = AesRng::new();
@@ -365,9 +396,15 @@ fn run_multithreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
                 config.threads_per_field(),
             )?;
             handles.extend(handles_fields);
-            info!("init time: {:?}", init_time.elapsed());
+            let setup_time = start_setup.elapsed();
+             info!("init time: {:?}", setup_time);
 
-            let start = Instant::now();
+             let start_verify = Instant::now();
+              let mut proof_size: usize = 0;
+           // wrap the channel in a counting channel
+            let counting_channel = CountingChannel::new(channel);
+            let mut channel = counting_channel;
+
             if is_text {
                 let relation_file = File::open(relation_path)?;
                 let relation_reader = BufReader::new(relation_file);
@@ -376,13 +413,21 @@ fn run_multithreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
                 evaluator.evaluate_relation(&relation_path)?;
             }
             evaluator.terminate()?;
+              proof_size = channel.bytes_sent() + channel.bytes_received();
+
+            let verify_time = start_verify.elapsed();
             for handle in handles {
                 handle.join().expect("thread failed to join")?;
             }
-            info!("circ exec time: {:?}", start.elapsed());
+             info!("circ exec time: {:?}", verify_time);
+               info!("proof size: {:?}", proof_size);
 
             info!("total time: {:?}", total_time.elapsed());
             info!("VERIFIER DONE!");
+            println!(
+            "Setup time: {:?}, Verifier time: {:?}, Proof size: {:?}",
+            setup_time, verify_time, proof_size
+        );
         }
         Some(_) => {
             // Prover mode
@@ -398,7 +443,7 @@ fn run_multithreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
                 bail!("cannot open first channel");
             };
 
-            let init_time = Instant::now();
+            let start_setup = Instant::now();
             let total_time = Instant::now();
 
             let rng = AesRng::new();
@@ -427,9 +472,15 @@ fn run_multithreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
                 config.threads_per_field(),
             )?;
             handles.extend(handles_fields);
-            info!("init time: {:?}", init_time.elapsed());
+            let setup_time = start_setup.elapsed();
+             info!("init time: {:?}", setup_time);
+             
+            let start_prove = Instant::now();
+            let mut proof_size: usize = 0;
+            // wrap the channel in a counting channel
+            let counting_channel = CountingChannel::new(channel);
+            let mut channel = counting_channel;
 
-            let start = Instant::now();
             if is_text {
                 let relation_file = File::open(relation_path)?;
                 let relation_reader = BufReader::new(relation_file);
@@ -438,26 +489,35 @@ fn run_multithreaded(args: &Cli, config: &Config, is_text: bool) -> Result<()> {
                 evaluator.evaluate_relation(&relation_path)?;
             }
             evaluator.terminate()?;
+            
+             proof_size = channel.bytes_sent() + channel.bytes_received();
+              let prove_time = start_prove.elapsed();
+
             for handle in handles {
                 handle.join().expect("thread failed to join")?;
             }
-            info!("circ exec time: {:?}", start.elapsed());
-
+            info!("circ exec time: {:?}", prove_time);
             info!("total time: {:?}", total_time.elapsed());
             info!("PROVER DONE!");
+             info!("proof size: {:?}", proof_size);
+
+               println!(
+            "Setup time: {:?}, Prover time: {:?}, Proof size: {:?}",
+            setup_time, prove_time, proof_size
+        );
         }
     }
     Ok(())
 }
 
 fn run_plaintext(args: &Cli) -> Result<()> {
-    let start = Instant::now();
+    let start_load = Instant::now();
     let (inputs, type_store) = if args.text {
         build_inputs_types_text(args)?
     } else {
         build_inputs_flatbuffers(args)?
     };
-    info!("time reading ins/wit/rel: {:?}", start.elapsed());
+    info!("time reading ins/wit/rel: {:?}", start_load.elapsed());
 
     let relation_path = args.relation.clone();
     match args.witness {
@@ -466,7 +526,7 @@ fn run_plaintext(args: &Cli) -> Result<()> {
         }
         Some(_) => {
             // Prover mode
-            let start = Instant::now();
+            let start_setup = Instant::now();
 
             let mut evaluator = EvaluatorCirc::<
                 Prover,
@@ -475,8 +535,9 @@ fn run_plaintext(args: &Cli) -> Result<()> {
                 Svole<_, F40b, F40b>,
             >::new_plaintext(inputs, type_store)?;
             evaluator.load_backends_plaintext()?;
-            info!("init time: {:?}", start.elapsed());
-            let start = Instant::now();
+            let setup_time = start_setup.elapsed();
+            info!("init time: {:?}", setup_time);
+            let start_prove = Instant::now();
 
             if args.text {
                 let relation_file = File::open(relation_path)?;
@@ -486,10 +547,64 @@ fn run_plaintext(args: &Cli) -> Result<()> {
                 evaluator.evaluate_relation(&relation_path)?;
             }
             evaluator.terminate()?;
-            info!("time circ exec: {:?}", start.elapsed());
+              let prove_time = start_prove.elapsed();
+             info!("time circ exec: {:?}", prove_time);
+             println!(
+            "Setup time: {:?}, Prover time: {:?}, Proof size: {:?}",
+            setup_time, prove_time, 0
+        );
         }
     }
     Ok(())
+}
+/// A channel that counts the number of bytes sent and received.
+struct CountingChannel<R, W> {
+    channel: Channel<R, W>,
+    bytes_sent: usize,
+    bytes_received: usize,
+}
+
+impl<R: std::io::Read, W: std::io::Write> CountingChannel<R, W> {
+    /// Creates a new `CountingChannel`.
+    fn new(channel: Channel<R, W>) -> Self {
+        Self {
+            channel,
+            bytes_sent: 0,
+            bytes_received: 0,
+        }
+    }
+    /// Returns the number of bytes sent.
+    fn bytes_sent(&self) -> usize {
+        self.bytes_sent
+    }
+    /// Returns the number of bytes received.
+    fn bytes_received(&self) -> usize {
+        self.bytes_received
+    }
+}
+
+impl<R: std::io::Read, W: std::io::Write> std::io::Read for CountingChannel<R, W> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        let res = self.channel.read(buf);
+         if let Ok(bytes_read) = res {
+            self.bytes_received += bytes_read;
+        }
+        res
+    }
+}
+
+impl<R: std::io::Read, W: std::io::Write> std::io::Write for CountingChannel<R, W> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+      let res = self.channel.write(buf);
+        if let Ok(bytes_written) = res{
+          self.bytes_sent += bytes_written;
+        }
+        res
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.channel.flush()
+    }
 }
 
 fn parse_addresses(args: &Cli, config: &Config) -> Vec<String> {

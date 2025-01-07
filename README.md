@@ -33,6 +33,7 @@
 - **`swanky-field-test`**: Utilitites for testing correctness of finite field implementations
 - **`swanky-flatbuffer-build`**: Tooling to automate compiling flatbuffer schemas
 - **`swanky-party`**: Support for types indexed by a party.
+- **`swanky-polynomial`**: Support for various representations of polynomials over finite fields
 - **`swanky-serialization`**: Traits and utilities for compact serialization into a canonical byte representation
 - **`vectoreyes`**: Cross-platform SIMD types and functions
 - **`web-mac-n-cheese-wasm`**: Web Mac'n'Cheese, the wasm part
@@ -115,4 +116,4 @@ material are those of the author(s) and do not necessarily reflect the views of
 the ARO, SSC Pacific, IARPA and DARPA. Distribution Statement ``A'' (Approved
 for Public Release, Distribution Unlimited).
 
-Copyright © 2019-2022 Galois, Inc.
+Copyright © 2019-2024 Galois, Inc.

@@ -449,9 +449,9 @@ pub struct FuncDecl {
 ///
 /// Arguments:
 /// - `output_counts`: A slice containing the outputs given as a tuple of
-/// [`TypeId`] and [`WireCount`].
+///   [`TypeId`] and [`WireCount`].
 /// - `input_counts`: A slice containing the inputs given as a tuple of
-/// [`TypeId`] and [`WireCount`].
+///   [`TypeId`] and [`WireCount`].
 pub(crate) fn output_input_counts(
     output_counts: &[(TypeId, WireCount)],
     input_counts: &[(TypeId, WireCount)],
@@ -476,9 +476,9 @@ pub(crate) fn output_input_counts(
 ///
 /// Arguments:
 /// - `output_counts`: A slice containing the outputs given as a tuple of
-/// [`TypeId`] and [`WireCount`].
+///   [`TypeId`] and [`WireCount`].
 /// - `input_counts`: A slice containing the inputs given as a tuple of
-/// [`TypeId`] and [`WireCount`].
+///   [`TypeId`] and [`WireCount`].
 pub(crate) fn first_unused_wire_id(
     output_counts: &[(TypeId, WireCount)],
     input_counts: &[(TypeId, WireCount)],
@@ -822,7 +822,7 @@ impl TapeT for Tape {
 #[repr(transparent)]
 pub struct TapeF<'a, F>(&'a mut Box<dyn TapeT>, PhantomData<F>);
 
-impl<'a, F: FiniteField + SieveIrDeserialize> Iterator for TapeF<'a, F> {
+impl<F: FiniteField + SieveIrDeserialize> Iterator for TapeF<'_, F> {
     type Item = F;
 
     fn next(&mut self) -> Option<Self::Item> {

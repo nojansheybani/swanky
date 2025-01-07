@@ -3,9 +3,9 @@
 
 use blake3::Hasher;
 use rand::{CryptoRng, Rng};
-use scuttlebutt::field::polynomial::{lagrange_denominator, lagrange_numerator};
 use scuttlebutt::field::FiniteField;
 use scuttlebutt::serialization::{SequenceDeserializer, SequenceSerializer};
+use swanky_polynomial::{lagrange_denominator, lagrange_numerator};
 
 /// An evaluator for Lagrange polynomials.
 pub(crate) struct LagrangeEvaluator<F> {
@@ -492,10 +492,10 @@ impl<F: FiniteField, const N: usize> From<SecretSharing<F, N>> for CorrectionSha
 mod tests {
     use super::*;
     use rand::SeedableRng;
-    use scuttlebutt::field::polynomial::Polynomial;
     use scuttlebutt::field::{F61p, F2};
     use scuttlebutt::ring::FiniteRing;
     use scuttlebutt::AesRng;
+    use swanky_polynomial::Polynomial;
 
     const N: usize = 16;
 

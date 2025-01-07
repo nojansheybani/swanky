@@ -277,19 +277,3 @@ mod tests {
         assert_eq!(v, v__);
     }
 }
-
-#[cfg(all(feature = "nightly", test))]
-mod benchmarks {
-    extern crate test;
-    use super::*;
-    use test::Bencher;
-
-    #[bench]
-    fn bench_transpose(b: &mut Bencher) {
-        let (nrows, ncols) = (128, 1 << 18);
-        let m = (0..nrows * ncols / 8)
-            .map(|_| rand::random::<u8>())
-            .collect::<Vec<u8>>();
-        b.iter(|| transpose(&m, nrows, ncols));
-    }
-}

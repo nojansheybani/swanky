@@ -12,6 +12,7 @@ workspace = true
 
 [dependencies]
 swanky-field.workspace = true
+swanky-polynomial.workspace = true
 swanky-serialization.workspace = true
 proptest.workspace = true
 generic-array.workspace = true

@@ -11,7 +11,7 @@ use std::{
     ops::{AddAssign, MulAssign, SubAssign},
 };
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, CtOption};
-use swanky_field::{polynomial::Polynomial, FiniteField, FiniteRing, PrimeFiniteField};
+use swanky_field::{FiniteField, FiniteRing, PrimeFiniteField};
 use swanky_serialization::{BiggerThanModulus, CanonicalSerialize};
 use swanky_serialization::{SequenceDeserializer, SequenceSerializer};
 
@@ -89,9 +89,6 @@ impl FiniteField for F2 {
     type PrimeField = Self;
 
     const GENERATOR: Self = F2(1);
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-        Polynomial::x()
-    }
 
     type NumberOfBitsInBitDecomposition = generic_array::typenum::U1;
 
@@ -305,5 +302,5 @@ mod tests {
     test_binop!(test_sub, sub_assign);
     test_binop!(test_mul, mul_assign);
 
-    swanky_field_test::test_field!(test_field, F2);
+    swanky_field_test::test_field!(test_field, F2, Polynomial::x);
 }

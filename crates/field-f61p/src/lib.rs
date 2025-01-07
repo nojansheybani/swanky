@@ -6,7 +6,7 @@ use generic_array::GenericArray;
 use rand::Rng;
 use std::ops::{AddAssign, MulAssign, SubAssign};
 use subtle::{Choice, ConditionallySelectable, ConstantTimeEq, ConstantTimeLess, CtOption};
-use swanky_field::{polynomial::Polynomial, FiniteField, FiniteRing, PrimeFiniteField};
+use swanky_field::{FiniteField, FiniteRing, PrimeFiniteField};
 use swanky_serialization::{BiggerThanModulus, CanonicalSerialize};
 
 /// A finite field over the Mersenne Prime 2^61 - 1
@@ -78,10 +78,6 @@ impl FiniteField for F61p {
 
     const GENERATOR: Self = F61p(37);
 
-    fn polynomial_modulus() -> Polynomial<Self::PrimeField> {
-        Polynomial::x()
-    }
-
     type NumberOfBitsInBitDecomposition = generic_array::typenum::U61;
 
     fn bit_decomposition(&self) -> GenericArray<bool, Self::NumberOfBitsInBitDecomposition> {
@@ -147,7 +143,6 @@ impl std::iter::Sum for F61p {
     //     }
     //     return a;
     // }
-
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         let mut out: u128 = 0;
         // Invariant: this code is correct if the length of the
@@ -209,7 +204,7 @@ mod tests {
     use super::*;
     use proptest::prelude::*;
 
-    swanky_field_test::test_field!(test_field, F61p);
+    swanky_field_test::test_field!(test_field, F61p, Polynomial::x);
 
     #[cfg(test)]
     proptest! {

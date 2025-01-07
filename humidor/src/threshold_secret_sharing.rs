@@ -9,8 +9,8 @@
 //! Packed (or ramp) variant of Shamir secret sharing,
 //! allowing efficient sharing of several secrets together.
 
-use scuttlebutt::field::polynomial::NewtonPolynomial;
 use scuttlebutt::field::{fft, fft::FieldForFFT, FiniteField};
+use swanky_polynomial::NewtonPolynomial;
 
 /// Generator for the packed variant of Shamir secret sharing, specifying number
 /// of secrets shared together, total number of shares, and privacy threshold.

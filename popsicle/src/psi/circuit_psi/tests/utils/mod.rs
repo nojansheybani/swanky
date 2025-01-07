@@ -93,10 +93,13 @@ pub fn enum_ids(n: usize, starting_position: u64, id_size: usize) -> Vec<Vec<u8>
 #[cfg(test)]
 use rand::{CryptoRng, Rng};
 #[cfg(test)]
+/// Generate a random `Vec` of `n` `u128`, modulo `modulus`.
 pub fn rand_u128_vec<RNG: CryptoRng + Rng>(n: usize, modulus: u128, rng: &mut RNG) -> Vec<u128> {
     (0..n).map(|_| rng.gen::<u128>() % modulus).collect()
 }
 #[cfg(test)]
+/// Generate a random `Vec` of `n` `u128`, modulo `modulus`, as little-endian
+/// `Vec`s of bytes.
 pub fn rand_u8_vec<RNG: CryptoRng + Rng>(n: usize, modulus: u128, rng: &mut RNG) -> Vec<Vec<u8>> {
     (0..n)
         .map(|_| (rng.gen::<u128>() % modulus).to_le_bytes().to_vec())
@@ -104,6 +107,8 @@ pub fn rand_u8_vec<RNG: CryptoRng + Rng>(n: usize, modulus: u128, rng: &mut RNG)
 }
 
 #[cfg(test)]
+/// Generate a random `Vec` of `n` _unique_ `u128`, modulo `modulus`, as
+/// little-endian `Vec`s of bytes.
 pub fn rand_u8_vec_unique<RNG: CryptoRng + Rng>(
     n: usize,
     modulus: u128,

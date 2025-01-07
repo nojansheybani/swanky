@@ -1,0 +1,16 @@
+[package]
+name = "swanky-polynomial"
+description = "Support for various representations of polynomials over finite fields"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+rand.workspace = true
+subtle.workspace = true
+swanky-field.workspace = true

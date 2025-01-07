@@ -82,13 +82,6 @@ where
     fn wire_value(&self, wire: &Self::Wire) -> Option<Self::FieldElement> {
         self.dmc.wire_value(wire)
     }
-
-    fn one(&self) -> Result<Self::FieldElement> {
-        self.dmc.one()
-    }
-    fn zero(&self) -> Result<Self::FieldElement> {
-        self.dmc.zero()
-    }
     fn random(&mut self) -> Result<Self::FieldElement> {
         self.dmc.random()
     }

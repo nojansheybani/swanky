@@ -549,7 +549,7 @@ impl CircuitBuilder<'_> {
                 .to_le_bytes(),
         )?;
         const MANIFEST_HASH_SEED: u64 = 0xab21cc575f95137;
-        let mut h = twox_hash::Xxh3Hash64::with_seed(MANIFEST_HASH_SEED);
+        let mut h = twox_hash::XxHash64::with_seed(MANIFEST_HASH_SEED);
         std::hash::Hasher::write(&mut h, self.builder.finished_data());
         std::hash::Hasher::write(&mut h, &MAC_N_CHEESE_VERSION.to_le_bytes());
         self.output_file
@@ -587,7 +587,7 @@ where
 }
 
 pub(crate) struct DataChunkWriter<'a, 'b> {
-    hasher: &'a mut twox_hash::Xxh3Hash64,
+    hasher: &'a mut twox_hash::XxHash64,
     // TODO: we might want to do BufWriter<lz4::Encoder<File>> instead
     t: &'a mut lz4::Encoder<&'b mut BufWriter<File>>,
     uncompressed_length: &'a mut u64,
@@ -614,7 +614,7 @@ where
 {
     const DATA_CHUNK_HASH_SEED: u64 = 0x2849d23fa51e9690;
     let start = t.stream_position()?;
-    let mut hasher = twox_hash::Xxh3Hash64::with_seed(DATA_CHUNK_HASH_SEED);
+    let mut hasher = twox_hash::XxHash64::with_seed(DATA_CHUNK_HASH_SEED);
     let mut uncompressed_length = 0;
     let mut compressor = lz4::EncoderBuilder::new().build(t)?;
     f(DataChunkWriter {

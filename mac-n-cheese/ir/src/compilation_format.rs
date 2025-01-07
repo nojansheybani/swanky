@@ -8,7 +8,6 @@ use scuttlebutt::field::{F128p, F61p, F63b, FiniteField, IsSubFieldOf, SmallBina
 use std::{
     any::{type_name, TypeId},
     fs::File,
-    hash::BuildHasherDefault,
     io::{Read, Seek},
     os::unix::prelude::FileExt,
     sync::atomic::AtomicU32,
@@ -552,8 +551,7 @@ pub fn read_private_manifest(f: &mut File) -> eyre::Result<PrivatesManifest> {
     f.seek(std::io::SeekFrom::Start(pos))?;
     let mut count = 0_u32;
     f.read_exact(bytemuck::bytes_of_mut(&mut count))?;
-    let mut out =
-        FxHashMap::with_capacity_and_hasher(count as usize, BuildHasherDefault::default());
+    let mut out = FxHashMap::with_capacity_and_hasher(count as usize, Default::default());
     let mut entry = PrivatesManifestEntry::zeroed();
     for _ in 0..count {
         f.read_exact(bytemuck::bytes_of_mut(&mut entry))?;

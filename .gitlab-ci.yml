@@ -1,6 +1,6 @@
 normal-test:
   tags: [docker-nix]
-  image: "python:3.12-bullseye"
+  image: "python:3.13-bookworm"
   interruptible: true
   variables:
     GIT_STRATEGY: fetch
@@ -25,7 +25,7 @@ normal-test:
     - ./swanky ci quick --cache-dir /var/lib/swanky-sccache/
 
 nightly-test:
-  image: debian:trixie
+  image: debian:bookworm
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: on_success

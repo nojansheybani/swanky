@@ -123,9 +123,9 @@ pub fn visit_task_definition<P: Party, T: TaskDefinitionVisitor<P>>(
             impl<P: Party> TaskDefinitionHelper<P> for Wrapper<P> {
                 type UnspecDefn<T: MacTypes> = assert_multiplication::AssertMultiplyNoSpec<P, T>;
                 type SmallBinaryDefn<TF: SmallBinaryField>
-                = assert_multiplication::AssertMultiplySmallBinary<P, TF>
+                    = assert_multiplication::AssertMultiplySmallBinary<P, TF>
                 where
-                    F2: IsSubFieldOf<TF> ;
+                    F2: IsSubFieldOf<TF>;
             }
             t.visit_helper::<Wrapper<P>>(ty)
         }

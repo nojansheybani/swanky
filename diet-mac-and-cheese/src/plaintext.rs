@@ -100,14 +100,6 @@ where
         Ok(Self::FieldElement::random(&mut self.rng))
     }
 
-    fn one(&self) -> Result<Self::FieldElement> {
-        Ok(Self::FieldElement::ONE)
-    }
-
-    fn zero(&self) -> Result<Self::FieldElement> {
-        Ok(Self::FieldElement::ZERO)
-    }
-
     fn constant(&mut self, val: Self::FieldElement) -> Result<Self::Wire> {
         self.input_public(val)
     }
@@ -167,7 +159,7 @@ impl BackendLiftT for DietMacAndCheesePlaintext<F2, F40b> {
 
     fn lift(&mut self) -> &mut Self::LiftedBackend {
         if self.extfield_backend.is_some() {
-            return self.extfield_backend.as_mut().unwrap();
+            self.extfield_backend.as_mut().unwrap()
         } else {
             unimplemented!()
         }
